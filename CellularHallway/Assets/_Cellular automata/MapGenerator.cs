@@ -245,20 +245,6 @@ public class MapGenerator : MonoBehaviour
         {
             tile = SectionQueue.Dequeue();
             section.Add(tile);
-            /*for (int x = startX-1 ; x <= startX + 1; x++)
-            {
-                for (int y = startY - 1; y <= startY + 1; y++)
-                {
-                    if (IsInsideMap(x,y) && (x == tile.xPos || y == tile.yPos))
-                    {
-                        if(VisitedTiles[x,y] == 0 && map[x,y] == TileState)
-                        {
-                            VisitedTiles[x, y] = 1;
-                            SectionQueue.Enqueue(new Tile(x, y));
-                        }
-                    }
-                }
-            }*/
             if (IsInsideMap(tile.xPos - 1, tile.yPos) && map[tile.xPos - 1, tile.yPos] == TileState && VisitedTiles[tile.xPos - 1, tile.yPos] == 0)
             {
                 VisitedTiles[tile.xPos - 1, tile.yPos] = 1;
