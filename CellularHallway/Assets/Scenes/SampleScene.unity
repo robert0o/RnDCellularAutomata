@@ -240,6 +240,8 @@ MonoBehaviour:
   fillPercent: 42
   iterations: 5
   seed: test
+  minWallSize: 10
+  minRoomSize: 40
   rule0: 0
   rule1: 0
   rule2: 0

@@ -13,15 +13,20 @@ public class MapGenerator : MonoBehaviour
     public int iterations;
     public string seed;
     int[,] map;
+    [Header("Fill sizes")]
+    public int minWallSize;
+    public int minRoomSize;
     [Header("Cel Rules")]
     [Range(0, 1)]
     public int rule0,rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8;
+    List<Hallway> hallways;
 
-    private void Update()
+
+    public void Update()
     {
         GenMap();
-
         getSectionsLists();
+        hallways = ConvertToHallways();
     }
     private void GenMap()
     {
@@ -152,8 +157,25 @@ public class MapGenerator : MonoBehaviour
                 Gizmos.DrawCube(pos, Vector3.one);
             }
         }
+        int offset = hight + 4;
+        int exOffset = 0;
+        int previousTotalOffset = 0;
+        foreach (Hallway hallway in hallways)
+        {
+            for (int x = 0; x < hallway.hWidth; x++)
+            {
+                for (int y = 0; y < hallway.hHight; y++)
+                {
+                    Gizmos.color = (hallway.hallway[x, y] == 0) ? Color.white : Color.black;
+                    Vector3 pos = new Vector3(x + exOffset, y + offset, 0);
+                    Gizmos.DrawCube(pos, Vector3.one);
+                }
+            }
+            exOffset = hallway.hWidth + previousTotalOffset + 4;
+            previousTotalOffset = exOffset;
+        }
     }
-
+    
     public struct Tile
     {
         public int xPos, yPos;
@@ -166,8 +188,8 @@ public class MapGenerator : MonoBehaviour
 
     void getSectionsLists()
     {
-        RemoveSmallSections(1, 3, 0);
-        RemoveSmallSections(0, 3, 2);
+        RemoveSmallSections(1, minWallSize, 0);
+        RemoveSmallSections(0, minRoomSize, 1);
     }
 
     void RemoveSmallSections(int targetState, int minimumSize, int changeTo)
@@ -175,7 +197,7 @@ public class MapGenerator : MonoBehaviour
         List<List<Tile>> wallSections = GetSections(targetState);
         foreach (List<Tile> section in wallSections)
         {
-            if (section.Count <= minimumSize)
+            if (section.Count < minimumSize)
             {
                 foreach (Tile tile in section)
                 {
@@ -258,14 +280,72 @@ public class MapGenerator : MonoBehaviour
                 SectionQueue.Enqueue(new Tile(tile.xPos, tile.yPos + 1));
             }
         }
-
-        
             return section;
     }
-    
+
+    List<Hallway> ConvertToHallways()
+    {
+        List<Hallway> hallways = new List<Hallway>();
+        List<List<Tile>> sectionList = GetSections(0);
+        foreach (List<Tile> section in sectionList)
+        {
+            int minX = int.MaxValue;
+            int maxX = int.MinValue;
+            int minY = int.MaxValue;
+            int maxY = int.MinValue;
+            for (int i = 0; i < section.Count; i++)
+            {
+                if (section[i].xPos < minX)
+                    minX = section[i].xPos;
+                if (section[i].xPos > maxX)
+                    maxX = section[i].xPos;
+                if (section[i].yPos < minY)
+                    minY = section[i].yPos;
+                if (section[i].yPos > maxY)
+                    maxY = section[i].yPos;
+            }
+
+            int hallWidth = 2 + (maxX - (minX - 1));
+            int hallHight = 2 + (maxY - (minY - 1));
+            int[,] hallMap = new int[hallWidth, hallHight];
+            for (int x = 0; x < hallWidth; x++)
+            {
+                for (int y = 0; y < hallHight; y++)
+                {
+                    hallMap[x, y] = 1;
+                }
+            }
+
+            int xOffset = 1 - minX;
+            int yOffset = 1 - minY;
+            int xPlacement, yPlacement;
+            for (int i = 0; i < section.Count; i++)
+            {
+                xPlacement = section[i].xPos + xOffset;
+                yPlacement = section[i].yPos + yOffset;
+                hallMap[xPlacement, yPlacement] = 0;
+            }
+            hallways.Add(new Hallway(hallMap, hallWidth, hallHight));
+        }
+        return hallways;
+    }
 
     bool IsInsideMap(int x,int y)
     {
         return (x >= 0 && x < width && y >= 0 && y < hight);
+    }
+}
+
+public class Hallway
+{
+    public int[,] hallway;
+    public readonly int hWidth;
+    public readonly int hHight;
+
+    public Hallway(int[,] _hallway, int width, int hight)
+    {
+        hallway = _hallway;
+        hWidth = width;
+        hHight = hight;
     }
 }
