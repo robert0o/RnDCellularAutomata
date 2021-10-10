@@ -235,11 +235,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f4423a61ddea1e4baca91266cec3427, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 200
-  hight: 200
-  fillPercent: 43
-  iterations: 8
-  seed: ugabuga
+  width: 40
+  hight: 40
+  fillPercent: 42
+  iterations: 5
+  seed: test
   rule0: 0
   rule1: 0
   rule2: 0
