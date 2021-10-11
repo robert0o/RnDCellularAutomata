@@ -27,6 +27,11 @@ public class MapGenerator : MonoBehaviour
         GenMap();
         getSectionsLists();
         hallways = ConvertToHallways();
+        ConnectionPoinSearch poin = new ConnectionPoinSearch();
+        foreach (Hallway hallway in hallways)
+        {
+            poin.FindPaths(hallway);
+        }
     }
     private void GenMap()
     {
@@ -166,7 +171,18 @@ public class MapGenerator : MonoBehaviour
             {
                 for (int y = 0; y < hallway.hHight; y++)
                 {
-                    Gizmos.color = (hallway.hallway[x, y] == 0) ? Color.white : Color.black;
+                    switch (hallway.hallway[x, y])
+                    {
+                        case 0:
+                            Gizmos.color = Color.white;
+                            break;
+                        case 2:
+                            Gizmos.color = Color.red;
+                            break;
+                        default:
+                            Gizmos.color = Color.black;
+                            break;
+                    }
                     Vector3 pos = new Vector3(x + exOffset, y + offset, 0);
                     Gizmos.DrawCube(pos, Vector3.one);
                 }
