@@ -21,17 +21,24 @@ public class MapGenerator : MonoBehaviour
     public int rule0,rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8;
     List<Hallway> hallways;
 
-
     public void Update()
+    {
+        List<Hallway> _hallways = gethallways();
+        CellPlacer cells = FindObjectOfType<CellPlacer>();
+        cells.PlaceCells(_hallways);
+    }
+
+    public List<Hallway> gethallways()
     {
         GenMap();
         getSectionsLists();
         hallways = ConvertToHallways();
-        ConnectionPoinSearch poin = new ConnectionPoinSearch();
+        /*ConnectionPoinSearch poin = new ConnectionPoinSearch();
         foreach (Hallway hallway in hallways)
         {
             poin.FindPaths(hallway);
-        }
+        }*/
+        return hallways;
     }
     private void GenMap()
     {
@@ -162,7 +169,7 @@ public class MapGenerator : MonoBehaviour
                 Gizmos.DrawCube(pos, Vector3.one);
             }
         }
-        int offset = hight + 4;
+        /*int offset = hight + 4;
         int exOffset = 0;
         int previousTotalOffset = 0;
         foreach (Hallway hallway in hallways)
@@ -189,8 +196,8 @@ public class MapGenerator : MonoBehaviour
             }
             exOffset = hallway.hWidth + previousTotalOffset + 4;
             previousTotalOffset = exOffset;
-        }
-    }
+        }//*/
+    }//*/
     
     public struct Tile
     {

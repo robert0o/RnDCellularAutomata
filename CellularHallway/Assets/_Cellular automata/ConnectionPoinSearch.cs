@@ -7,25 +7,38 @@ public class ConnectionPoinSearch
     Hallway hallway;
     List<Node> VisitedNodes;
     int startingX, startingY;
-    public Hallway FindPaths(Hallway _hallway)
+    public List<Node> FindPaths(Hallway _hallway)
     {
         Queue<Node> nodes = new Queue<Node>();
         VisitedNodes = new List<Node>();
         hallway = _hallway;
-        int yMid = hallway.hHight / 2;
-        int xMid = hallway.hHight / 3;
+        int yMid = Mathf.RoundToInt(hallway.hHight / 2f);
+        int xMid = Mathf.RoundToInt(hallway.hWidth / 2f);
         int[,] visitedTiles = new int[hallway.hWidth, hallway.hHight];
 
-        for (int x = xMid; x < hallway.hWidth; x++)
+
+        List<int> xOpenSpaces = new List<int>();
+        List<int> yOpenSpaces = new List<int>();
+        for (int x = 0; x < hallway.hWidth; x++)
         {
             if (hallway.hallway[x, yMid] == 0)
+                xOpenSpaces.Add(x);
+        }
+        int middleXopenspaces = Mathf.RoundToInt((xOpenSpaces.Count - 1) / 2f);
+        int middleX = xOpenSpaces[middleXopenspaces];
+        for (int y = 0; y < hallway.hHight; y++)
+        {
+            if (hallway.hallway[middleX, y] == 0)
             {
-                nodes.Enqueue(new Node(x, yMid, 0));
-                startingX = x;
-                startingY = yMid;
-                break;
+                yOpenSpaces.Add(y);
             }
         }
+        int middleY = yOpenSpaces[Mathf.RoundToInt((yOpenSpaces.Count - 1) / 2f)];
+        nodes.Enqueue(new Node(middleX, middleY, 0));
+        startingX = middleX;
+        startingY = middleY;
+    
+        
 
         while (nodes.Count > 0)
         {
@@ -33,78 +46,23 @@ public class ConnectionPoinSearch
             VisitedNodes.Add(node);
             Node otherNode = null;
             visitedTiles[node.x, node.y] = 1;
-            /*if (hallway.hallway[node.x-1, node.y] == 0)
-            {
-                otherNode = GetNode(node.x - 1, node.y);
-                if (visitedTiles[node.x - 1, node.y] == 0)
-                {
-                    visitedTiles[node.x - 1, node.y] = 1;
-                    nodes.Enqueue(new Node(node.x - 1, node.y, node.distancevalue + 1));
-                }
-            }
-            if (hallway.hallway[node.x+1, node.y] == 0)
-            {
-                otherNode = GetNode(node.x + 1, node.y);
-                if (visitedTiles[node.x + 1, node.y] == 0)
-                {
-                    visitedTiles[node.x + 1, node.y] = 1;
-                    nodes.Enqueue(new Node(node.x + 1, node.y, node.distancevalue + 1));
-                }
-            }
-            if (hallway.hallway[node.x, node.y-1] == 0)
-            {
-                otherNode = GetNode(node.x, node.y -1);
-                if (visitedTiles[node.x, node.y - 1] == 0)
-                {
-                    visitedTiles[node.x, node.y - 1] = 1;
-                    nodes.Enqueue(new Node(node.x, node.y - 1, node.distancevalue + 1));
-                }
-            }
-            if (hallway.hallway[node.x, node.y+1] == 0)
-            {
-                otherNode = GetNode(node.x, node.y + 1);
-                if (visitedTiles[node.x, node.y + 1] == 0)
-                {
-                    visitedTiles[node.x, node.y + 1] = 1;
-                    nodes.Enqueue(new Node(node.x, node.y + 1, node.distancevalue + 1));
-                }
-            }//*/
-
-            int nodeX, nodeY;
+            int[] look;
             for (int i = 0; i < 4; i++)
             {
-                switch (i)
+                look = LookNext(node.x, node.y, i);
+                if (hallway.hallway[look[0], look[1]] == 0)
                 {
-                    case 0:
-                        nodeX = node.x - 1;
-                        nodeY = node.y;
-                        break;
-                    case 1:
-                        nodeX = node.x + 1;
-                        nodeY = node.y;
-                        break;
-                    case 2:
-                        nodeX = node.x;
-                        nodeY = node.y - 1;
-                        break;
-                    default:
-                        nodeX = node.x;
-                        nodeY = node.y + 1;
-                        break;
-                }
-                if (hallway.hallway[nodeX, nodeY] == 0)
-                {
-                    otherNode = GetNode(nodeX, nodeY);
-                    if (visitedTiles[nodeX, nodeY] == 0)
+                    otherNode = GetNode(look[0], look[1]);
+                    if (visitedTiles[look[0], look[1]] == 0)
                     {
-                        visitedTiles[nodeX, nodeY] = 1;
-                        nodes.Enqueue(new Node(nodeX, nodeY, node.distancevalue + 1,GetDirectionOfNode(nodeX,nodeY)));
+                        visitedTiles[look[0], look[1]] = 1;
+                        nodes.Enqueue(new Node(look[0], look[1], node.distancevalue + 1,GetDirectionOfNode(look[0], look[1])));
                     }
                 }
             }//*/
         }
-        hallway = SetFurthestPooints(hallway);
-        return hallway;
+        //hallway = SetFurthestPooints(hallway);
+        return VisitedNodes;//*/
     }
     Node GetNode(int x,int y)
     {
@@ -188,6 +146,31 @@ public class ConnectionPoinSearch
             hall.hallway[nodeArray[i].x, nodeArray[i].y] = 2;
         }
         return hall;
+    }
+
+    int[] LookNext(int x, int y, int iteration)
+    {
+        int[] XnY = new int[2];
+        switch (iteration)
+        {
+            case 0:
+                XnY[0] = x - 1;
+                XnY[1] = y;
+                break;
+            case 1:
+                XnY[0] = x + 1;
+                XnY[1] = y;
+                break;
+            case 2:
+                XnY[0] = x;
+                XnY[1] = y - 1;
+                break;
+            default:
+                XnY[0] = x;
+                XnY[1] = y + 1;
+                break;
+        }
+        return XnY;
     }
 }
 
