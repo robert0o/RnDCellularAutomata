@@ -8,23 +8,24 @@ public class CellScript : MonoBehaviour
     public Color[] colors = new Color[3];
     public SpriteRenderer sprite;
 
-    public void InitCell(int cellType,int distanceValue, Vector3 pos)
+    public void InitCell(int distanceValue, Vector3 pos)
     {
-        switch (cellType)
-        {
-            case 0:
-                sprite.color = colors[0];
-                text.text = "" + distanceValue.ToString();
-                break;
-            case 2:
-                sprite.color = colors[2];
-                text.text = "" + distanceValue.ToString();
-                break;
-            case 1:
-                sprite.color = colors[1];
-                text.gameObject.SetActive(false);
-                break;
-
+        if(distanceValue == 0) {
+            sprite.color = colors[0];
+            text.text = "" + distanceValue.ToString();
+        }
+        else if (distanceValue == 1) {
+            sprite.color = colors[1];
+            text.text = "1";
+        }
+        else if (distanceValue < short.MaxValue) {
+            sprite.color = colors[2];
+            text.text = "" + distanceValue.ToString();
+        }
+        else if (distanceValue > short.MaxValue) {
+            sprite.color = colors[3];
+            int newDistV = distanceValue - short.MaxValue;
+            text.text = "" + newDistV.ToString();
         }
         transform.position = pos;
     }

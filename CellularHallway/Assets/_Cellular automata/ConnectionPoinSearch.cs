@@ -4,16 +4,15 @@ using UnityEngine;
 
 public class ConnectionPoinSearch
 {
-    Hallway hallway;
+    //Hallway hallway;
     List<Node> VisitedNodes;
     int startingX, startingY;
-    public List<Node> FindPaths(Hallway _hallway)
+    /*public List<Node> FindPaths(Hallway _hallway)
     {
         Queue<Node> nodes = new Queue<Node>();
         VisitedNodes = new List<Node>();
         hallway = _hallway;
         int yMid = Mathf.RoundToInt(hallway.hHight / 2f);
-        int xMid = Mathf.RoundToInt(hallway.hWidth / 2f);
         int[,] visitedTiles = new int[hallway.hWidth, hallway.hHight];
 
 
@@ -37,8 +36,8 @@ public class ConnectionPoinSearch
         nodes.Enqueue(new Node(middleX, middleY, 0));
         startingX = middleX;
         startingY = middleY;
-    
-        
+
+        int[,] PathTileMap = new int[hallway.hWidth, hallway.hHight];
 
         while (nodes.Count > 0)
         {
@@ -56,14 +55,132 @@ public class ConnectionPoinSearch
                     if (visitedTiles[look[0], look[1]] == 0)
                     {
                         visitedTiles[look[0], look[1]] = 1;
+                        PathTileMap[look[0], look[1]] = node.distancevalue + 1;
                         nodes.Enqueue(new Node(look[0], look[1], node.distancevalue + 1,GetDirectionOfNode(look[0], look[1])));
                     }
                 }
-            }//*/
+            }
         }
         //hallway = SetFurthestPooints(hallway);
-        return VisitedNodes;//*/
+        return VisitedNodes;
     }
+    //*/
+    public int[,] findEnds(int [,] invertedMap)
+    {
+        int[,] newMap = new int[invertedMap.GetLength(0), invertedMap.GetLength(1)];
+        int[,] visitedMap = new int[invertedMap.GetLength(0), invertedMap.GetLength(1)];
+        Queue<Vector3Int> PointsToLookAt = new Queue<Vector3Int>();
+        
+        int yMid = Mathf.RoundToInt((invertedMap.GetLength(1)-1) / 2f);
+        int xStart, yStart;
+
+        List<int> xOpenSpaces = new List<int>();
+        List<int> yOpenSpaces = new List<int>();
+        for (int x = 0; x < invertedMap.GetLength(0); x++)
+        {
+            if (invertedMap[x, yMid] > 0)
+                xOpenSpaces.Add(x);
+        }
+        int middleXopenspaces = Mathf.RoundToInt((xOpenSpaces.Count -1) / 2f);
+        int middleX = xOpenSpaces[middleXopenspaces];
+        for (int y = 0; y < invertedMap.GetLength(1); y++)
+        {
+            if (invertedMap[middleX, y] > 0)
+            {
+                yOpenSpaces.Add(y);
+            }
+        }
+        int middleY = yOpenSpaces[Mathf.RoundToInt((yOpenSpaces.Count -1) / 2f)];
+        xStart = middleX;
+        yStart = middleY;
+        PointsToLookAt.Enqueue(new Vector3Int(xStart, yStart,1));
+        newMap[xStart, yStart] = 1;
+        int[] look;
+        Queue<Vector3Int> endPoints = new Queue<Vector3Int>();
+        bool isEndPoint;
+        while (PointsToLookAt.Count > 0)
+        {
+            isEndPoint = true;
+            Vector3Int node = PointsToLookAt.Dequeue();
+            visitedMap[node.x, node.y] = 1;
+            for (int i = 0; i < 4; i++)
+            {
+                look = LookNext(node.x, node.y, i);
+                if (invertedMap[look[0], look[1]] > 0)
+                {
+                    if (visitedMap[look[0], look[1]] == 0)
+                    {
+                        visitedMap[look[0], look[1]] = 1;
+                        newMap[look[0], look[1]] = node.z + 1;
+                        PointsToLookAt.Enqueue(new Vector3Int(look[0], look[1], node.z + 1));
+                        isEndPoint = false;
+                    }
+                }
+            }//*/
+            if (isEndPoint == true)
+            {
+                //newMap[node.x, node.y] = short.MaxValue + node.z;
+                endPoints.Enqueue(node);
+            }
+        }
+        
+        if (endPoints.Count > 0)
+            newMap = CycleToEndPoints(newMap, endPoints);//*/
+
+        return newMap;
+    }
+    int[,] CycleToEndPoints(int[,] travelMap, Queue<Vector3Int> endpoints)
+    {
+        int[,] endMap = travelMap;
+        int[,] visitedMap = new int[travelMap.GetLength(0), travelMap.GetLength(1)];
+        Queue<Vector3Int> endQueue = new Queue<Vector3Int>();
+
+        Queue<Vector3Int> testQueue = new Queue<Vector3Int>();
+
+        while (endpoints.Count > 0)
+        {
+            Vector3Int node = endpoints.Dequeue();
+            visitedMap[node.x, node.y] = 1;
+            endQueue.Enqueue(node);
+        }
+        int LookingAtNode;
+        int thisNode;
+        while (endQueue.Count > 0)
+        {
+            bool hasHigherOrEqualNeighbor = false;
+            Vector3Int node = endQueue.Dequeue();
+            for (int x = node.x -1; x <= node.x + 1; x++)
+            {
+                for (int y = node.y - 1; y <= node.y + 1; y++)
+                {
+                    LookingAtNode = endMap[x, y];  thisNode = endMap[node.x, node.y];
+                    if(endMap[x, y] >= endMap[node.x, node.y] && (x != node.x || y!= node.y))
+                    {
+                        hasHigherOrEqualNeighbor = true;
+                        if (visitedMap[x,y] == 0)
+                        {
+                            visitedMap[x, y] = 1;
+                            endQueue.Enqueue(new Vector3Int(x, y, endMap[x, y]));
+                        }
+                    }
+                }
+            }
+            if (hasHigherOrEqualNeighbor == false)
+            {
+                //endMap[node.x, node.y] = short.MaxValue + node.z;
+                testQueue.Enqueue(node);
+            }
+        }
+        
+        while(testQueue.Count> 0)
+        {
+            Vector3Int lastNode = testQueue.Dequeue();
+            endMap[lastNode.x, lastNode.y] = short.MaxValue + lastNode.z;
+        }
+
+        return endMap;
+    }
+
     Node GetNode(int x,int y)
     {
         for (int i = 0; i < VisitedNodes.Count; i++)

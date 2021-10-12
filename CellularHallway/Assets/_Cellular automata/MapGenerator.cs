@@ -20,25 +20,41 @@ public class MapGenerator : MonoBehaviour
     public bool useTileMap = false;
     [Header("Cel Rules")]
     [Range(0, 1)]
-    public int rule0,rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8;
+    public int rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8;
     List<Hallway> hallways;
 
+
+
+    public void Start()
+    {
+       // StartCoroutine(makeASlowMap());
+    }
+
+    public IEnumerator makeASlowMap()
+    {
+        while (useTileMap == false)
+        {
+            yield return new WaitForSeconds(1);
+            //CalledByUpdate();
+        }
+    } 
     public void Update()
     {
         List<Hallway> _hallways = gethallways();
-        if (useTileMap == false)
+        
         {
-            CellPlacer cells = FindObjectOfType<CellPlacer>();
-            cells.PlaceCells(_hallways);
-        }
-        else
-        {
+            List<int[,]> maps = new List<int[,]>();
             ConnectionPoinSearch poin = new ConnectionPoinSearch();
             foreach (Hallway hallway in hallways)
             {
-                poin.FindPaths(hallway);
-                poin.SetFurthestPooints(hallway);
+                hallway.hallway = InvertMap(hallway.hallway);
+                hallway.hallway = poin.findEnds(hallway.hallway);
+                maps.Add(hallway.hallway);
+                /* poin.FindPaths(hallway);
+                 poin.SetFurthestPooints(hallway);*/
             }//*/
+            CellPlacer cells = FindObjectOfType<CellPlacer>();
+            cells.PlaceCells(maps, hight);
         }
     }
 
@@ -178,37 +194,7 @@ public class MapGenerator : MonoBehaviour
                 Gizmos.DrawCube(pos, Vector3.one);
             }
         }
-        if (useTileMap == true)
-        {
-            int offset = hight + 4;
-            int exOffset = 0;
-            int previousTotalOffset = 0;
-            foreach (Hallway hallway in hallways)
-            {
-                for (int x = 0; x < hallway.hWidth; x++)
-                {
-                    for (int y = 0; y < hallway.hHight; y++)
-                    {
-                        switch (hallway.hallway[x, y])
-                        {
-                            case 0:
-                                Gizmos.color = Color.white;
-                                break;
-                            case 2:
-                                Gizmos.color = Color.red;
-                                break;
-                            default:
-                                Gizmos.color = Color.black;
-                                break;
-                        }
-                        Vector3 pos = new Vector3(x + exOffset, y + offset, 0);
-                        Gizmos.DrawCube(pos, Vector3.one);
-                    }
-                }
-                exOffset = hallway.hWidth + previousTotalOffset + 4;
-                previousTotalOffset = exOffset;
-            }//*/
-        }
+        
     }//*/
     
     public struct Tile
@@ -355,6 +341,20 @@ public class MapGenerator : MonoBehaviour
     {
         return (x >= 0 && x < width && y >= 0 && y < hight);
     }
+
+    int[,] InvertMap(int[,] _map)
+    {
+        int[,] newMap = new int[_map.GetLength(0), _map.GetLength(1)];
+        for (int x = 0; x < _map.GetLength(0); x++)
+        {
+            for (int y = 0; y < _map.GetLength(1); y++)
+            {
+                newMap[x, y] = (_map[x, y] == 0) ? 1 : 0;
+            }
+        }
+        return newMap;
+    }
+
 }
 
 public class Hallway

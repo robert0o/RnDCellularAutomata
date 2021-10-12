@@ -268,11 +268,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 40
   hight: 40
-  fillPercent: 59
-  iterations: 5
-  seed: s
+  fillPercent: 69
+  iterations: 3
+  seed: dksjrlskwwwnalwos
   minWallSize: 10
   minRoomSize: 40
+  useTileMap: 1
   rule0: 1
   rule1: 0
   rule2: 1
