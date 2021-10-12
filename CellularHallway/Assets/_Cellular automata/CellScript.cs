@@ -8,7 +8,7 @@ public class CellScript : MonoBehaviour
     public Color[] colors = new Color[3];
     public SpriteRenderer sprite;
 
-    public void InitCell(int cellType,int distanceValue, Vector2 pos)
+    public void InitCell(int cellType,int distanceValue, Vector3 pos)
     {
         switch (cellType)
         {

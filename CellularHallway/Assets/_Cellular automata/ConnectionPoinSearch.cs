@@ -107,7 +107,7 @@ public class ConnectionPoinSearch
 
         return dir;
     }
-    Hallway SetFurthestPooints(Hallway _hall)
+    public Hallway SetFurthestPooints(Hallway _hall)
     {
         Hallway hall = _hall;
         Node[] nodeArray = new Node[4];

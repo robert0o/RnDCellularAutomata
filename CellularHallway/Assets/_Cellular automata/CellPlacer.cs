@@ -45,7 +45,7 @@ public class CellPlacer : MonoBehaviour
             for (int j = 0; j < nodes.Count; j++)
             {
                 cellPlacer = Instantiate(cell,cellholder.transform).GetComponent<CellScript>();
-                cellPlacer.InitCell(0, nodes[j].distancevalue, new Vector2(nodes[j].x + exOffset, nodes[j].y + Yoffset));
+                cellPlacer.InitCell(0, nodes[j].distancevalue, new Vector3(nodes[j].x + exOffset, nodes[j].y + Yoffset, -9));
             }
             exOffset += Xoffset;
         }
