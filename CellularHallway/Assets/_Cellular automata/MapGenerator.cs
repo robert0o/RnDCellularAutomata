@@ -18,47 +18,31 @@ public class MapGenerator : MonoBehaviour
     public int minRoomSize;
     [Header("HallwayType")]
     public bool useTileMap = false;
-    [Header("Cel Rules")]
+    [Header("Cell Rules")]
     [Range(0, 1)]
-    public int rule0, rule1, rule2, rule3, rule4, rule5, rule6, rule7, rule8;
-    List<Hallway> hallways;
+    public int[] rules = new int[9];
+    List<int[,]> hallways;
 
-
-
-    public void Start()
-    {
-       // StartCoroutine(makeASlowMap());
-    }
-
-    public IEnumerator makeASlowMap()
-    {
-        while (useTileMap == false)
-        {
-            yield return new WaitForSeconds(1);
-            //CalledByUpdate();
-        }
-    } 
     public void Update()
     {
-        List<Hallway> _hallways = gethallways();
-        
+        hallways = gethallways();
+
+        List<int[,]> maps = new List<int[,]>();
+        ConnectionPoinSearch point = new ConnectionPoinSearch();
+
+        for (int i = 0; i < hallways.Count; i++)
         {
-            List<int[,]> maps = new List<int[,]>();
-            ConnectionPoinSearch poin = new ConnectionPoinSearch();
-            foreach (Hallway hallway in hallways)
-            {
-                hallway.hallway = InvertMap(hallway.hallway);
-                hallway.hallway = poin.findEnds(hallway.hallway);
-                maps.Add(hallway.hallway);
-                /* poin.FindPaths(hallway);
-                 poin.SetFurthestPooints(hallway);*/
-            }//*/
-            CellPlacer cells = FindObjectOfType<CellPlacer>();
-            cells.PlaceCells(maps, hight);
+            hallways[i] = InvertMap(hallways[i]);
+            hallways[i] = point.findEnds(hallways[i]);
+            maps.Add(hallways[i]);
         }
+        
+        CellPlacer cells = FindObjectOfType<CellPlacer>();
+        cells.PlaceCells(maps, hight);
+    
     }
 
-    public List<Hallway> gethallways()
+    public List<int[,]> gethallways()
     {
         GenMap();
         getSectionsLists();
@@ -99,44 +83,44 @@ public class MapGenerator : MonoBehaviour
         {
             for (int y = 0; y < hight; y++)
             {
-                iterationMap[x, y] = rules(SurroundWalls(x, y));
+                iterationMap[x, y] = Rules(SurroundWalls(x, y));
             }
         }
         map = iterationMap;
     }
     
-    int rules(int walls)
+    int Rules(int walls)
     {
         int state = 0;
 
         switch (walls)
         {
             case 0:
-                state = rule0;
+                state = rules[0];
                 break;
             case 1:
-                state = rule1;
+                state = rules[1];
                 break;
             case 2:
-                state = rule2;
+                state = rules[2];
                 break;
             case 3:
-                state = rule3;
+                state = rules[3];
                 break;
             case 4:
-                state = rule4;
+                state = rules[4];
                 break;
             case 5:
-                state = rule5;
+                state = rules[5];
                 break;
             case 6:
-                state = rule6;
+                state = rules[6];
                 break;
             case 7:
-                state = rule7;
+                state = rules[7];
                 break;
             case 8:
-                state = rule8;
+                state = rules[8];
                 break;
             default:
                 state = 0;
@@ -168,35 +152,6 @@ public class MapGenerator : MonoBehaviour
         return wallCount;
     }
 
-    private void OnDrawGizmos()
-    {
-        if (map == null) return;
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < hight; y++)
-            {
-                switch (map[x, y])
-                {
-                    case 1:
-                        Gizmos.color = Color.black;
-                        break;
-                    case 0:
-                        Gizmos.color = Color.white;
-                        break;
-                    case 2:
-                        Gizmos.color = Color.red;
-                        break;
-                    default:
-                        Gizmos.color = Color.yellow;
-                        break;
-                }
-                Vector3 pos = new Vector3(x, y,0);
-                Gizmos.DrawCube(pos, Vector3.one);
-            }
-        }
-        
-    }//*/
-    
     public struct Tile
     {
         public int xPos, yPos;
@@ -290,9 +245,9 @@ public class MapGenerator : MonoBehaviour
             return section;
     }
 
-    List<Hallway> ConvertToHallways()
+    List<int[,]> ConvertToHallways()
     {
-        List<Hallway> hallways = new List<Hallway>();
+        List<int[,]> hallways = new List<int[,]>();
         List<List<Tile>> sectionList = GetSections(0);
         foreach (List<Tile> section in sectionList)
         {
@@ -332,7 +287,7 @@ public class MapGenerator : MonoBehaviour
                 yPlacement = section[i].yPos + yOffset;
                 hallMap[xPlacement, yPlacement] = 0;
             }
-            hallways.Add(new Hallway(hallMap, hallWidth, hallHight));
+            hallways.Add(hallMap);
         }
         return hallways;
     }
@@ -355,18 +310,32 @@ public class MapGenerator : MonoBehaviour
         return newMap;
     }
 
-}
-
-public class Hallway
-{
-    public int[,] hallway;
-    public readonly int hWidth;
-    public readonly int hHight;
-
-    public Hallway(int[,] _hallway, int width, int hight)
+    private void OnDrawGizmos()
     {
-        hallway = _hallway;
-        hWidth = width;
-        hHight = hight;
-    }
+        if (map == null) return;
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < hight; y++)
+            {
+                switch (map[x, y])
+                {
+                    case 1:
+                        Gizmos.color = Color.black;
+                        break;
+                    case 0:
+                        Gizmos.color = Color.white;
+                        break;
+                    case 2:
+                        Gizmos.color = Color.red;
+                        break;
+                    default:
+                        Gizmos.color = Color.yellow;
+                        break;
+                }
+                Vector3 pos = new Vector3(x, y, 0);
+                Gizmos.DrawCube(pos, Vector3.one);
+            }
+        }
+
+    }//*/
 }
