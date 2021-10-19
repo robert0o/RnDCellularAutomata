@@ -32,36 +32,37 @@ public class DungeonPart {
             }
         }
         int halfx = tileMap.GetLength(0) / 2, halfY = tileMap.GetLength(1) / 2;
+        cPoints = new List<cPoint>();
         for (int i = 0; i < points.Count; i++)
         {
             if (points[i].x < halfx && points[i].y < halfY) 
             {
                 //bottemLeft
-                cPoints.Add(new cPoint(points[i], Dir.BL));
+                cPoints.Add(new cPoint(points[i], Dir.LB));
             }
             if (points[i].x >= halfx && points[i].y < halfY)
             {
                 //bottomRight
-                cPoints.Add(new cPoint(points[i], Dir.BR));
+                cPoints.Add(new cPoint(points[i], Dir.RB));
             }
             if (points[i].x < halfx && points[i].y >= halfY)
             {
                 //topLeft
-                cPoints.Add(new cPoint(points[i], Dir.TL));
+                cPoints.Add(new cPoint(points[i], Dir.LT));
             }
             if (points[i].x >= halfx && points[i].y >= halfY)
             {
                 //topRight
-                cPoints.Add(new cPoint(points[i], Dir.TR));
+                cPoints.Add(new cPoint(points[i], Dir.RT));
             }
         }
     }
     public enum Dir
     {
-        TL,
-        TR,
-        BL,
-        BR
+        LB,
+        LT,
+        RB,
+        RT
     }
     public struct cPoint
     {

@@ -19,7 +19,7 @@ public class CellPlacer : MonoBehaviour
             xOffset += maps[i].GetLength(0) + 4;
         }
     }
-    void PlaceMapCells(int[,] map, int xOffset, int yOffset)
+    public void PlaceMapCells(int[,] map, int xOffset, int yOffset)
     {
         for (int x = 0; x < map.GetLength(0); x++)
         {

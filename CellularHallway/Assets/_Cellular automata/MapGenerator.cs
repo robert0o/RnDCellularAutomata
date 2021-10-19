@@ -23,8 +23,10 @@ public class MapGenerator : MonoBehaviour
     public int[] rules = new int[9];
     List<int[,]> hallways;
 
-    public void Update()
+    public List<int[,]> GetMaps(string _seed, int _iterations)
     {
+        seed = _seed;
+        iterations = _iterations;
         hallways = gethallways();
 
         List<int[,]> maps = new List<int[,]>();
@@ -36,9 +38,10 @@ public class MapGenerator : MonoBehaviour
             hallways[i] = point.findEnds(hallways[i]);
             maps.Add(hallways[i]);
         }
-        
-        CellPlacer cells = FindObjectOfType<CellPlacer>();
-        cells.PlaceCells(maps, hight);
+
+        return maps;
+        /*CellPlacer cells = FindObjectOfType<CellPlacer>();
+        cells.PlaceCells(maps, hight);//*/
     
     }
 
@@ -144,11 +147,8 @@ public class MapGenerator : MonoBehaviour
                 {
                     wallCount++;
                 }
-                
-                
             }
         }
-
         return wallCount;
     }
 
@@ -214,7 +214,6 @@ public class MapGenerator : MonoBehaviour
         int TileState = map[startX, startY];
         
         VisitedTiles[startX, startY] = 1;
-        
         
         Tile tile;
         while (SectionQueue.Count > 0)
@@ -310,7 +309,7 @@ public class MapGenerator : MonoBehaviour
         return newMap;
     }
 
-    private void OnDrawGizmos()
+   /* private void OnDrawGizmos()
     {
         if (map == null) return;
         for (int x = 0; x < width; x++)
@@ -336,6 +335,5 @@ public class MapGenerator : MonoBehaviour
                 Gizmos.DrawCube(pos, Vector3.one);
             }
         }
-
     }//*/
 }
