@@ -42,7 +42,7 @@ public class MapGenerator : MonoBehaviour
         return maps;
         /*CellPlacer cells = FindObjectOfType<CellPlacer>();
         cells.PlaceCells(maps, hight);//*/
-    
+
     }
 
     public List<int[,]> gethallways()

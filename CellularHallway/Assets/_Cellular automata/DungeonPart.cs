@@ -25,7 +25,7 @@ public class DungeonPart {
                     points.Add(new Vector2Int(x, y));
                 if (tileMap[x, y] == 1)
                     startPoint = new Vector2Int(x, y);
-                if (tileMap[x, y] > 1 && tileMap[x, y] > short.MaxValue)
+                if (tileMap[x, y] > 1 && tileMap[x, y] < short.MaxValue)
                     tileMap[x, y] = 1;
                 if (tileMap[x, y] > short.MaxValue)
                     tileMap[x, y] = 2;
