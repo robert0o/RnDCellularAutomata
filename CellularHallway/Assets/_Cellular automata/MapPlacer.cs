@@ -39,41 +39,9 @@ public class MapPlacer : MonoBehaviour
     {
         SetDungeonParts();
 
-        //int[,] dungeonMap = new int[xMax * xRange, yMax * yRange];
-        int[,] dungeonMap = new int[100, 100];
+        int[,] dungeonMap = new int[xMax * xRange, yMax * yRange];
         int atPart = 0;
-        for (int i = 0; i < xRange && atPart < dungeonParts.Length; i++)
-        {
-            for (int j = 0; j < yRange && atPart < dungeonParts.Length; j++, atPart++)
-            {
-                int xOffset = 0, yOffset = 0;
-                
 
-                for (int x = 0; x < dungeonParts[atPart].tileMap.GetLength(0); x++)
-                {
-                    for (int y = 0; y < dungeonParts[atPart].tileMap.GetLength(1); y++)
-                    {
-                        if(dungeonParts[atPart].tileMap[x, y] > 0)
-                            dungeonMap[x + xOffset, y + yOffset] = dungeonParts[atPart].tileMap[x, y];
-
-                        xOffset = i * xMax + 20;
-                        yOffset = j * yMax + 20;//*/
-                    }
-                }
-                if (atPart + 1 < dungeonParts.Length)
-                {
-                    Vector2Int connectStart = SelectpointToConnect(i, j, atPart);
-                    Vector2Int connectEnd = ConnectToPoint(i, j, atPart + 1);
-                    if (connectStart != Vector2Int.zero && connectEnd != Vector2Int.zero)
-                    {
-                        OverlapTop(dungeonParts[atPart].tileMap, connectStart, dungeonParts[atPart + 1].tileMap, connectEnd);
-                    }
-                }
-                else if (atPart! < dungeonParts.Length) return;//*/
-
-                
-            }
-        }
         /*CellPlacer cells = FindObjectOfType<CellPlacer>();
         cells.PlaceMapCells(dungeonMap,0,0);//*/
     }
@@ -198,228 +166,170 @@ public class MapPlacer : MonoBehaviour
         return dir;
     }
 
-    void OverlapLeft(int[,] map1, Vector2Int point1, int[,] map2, Vector2Int point2)
+    int[,] SetPartToMap(int[,] mapToSetTo, int[,] PartToSet, int universalOffset = 0)
     {
-        int Offset = map1.GetLength(0);
-
-        int yDif =  point1.y - point2.y;
-
-        Vector2Int tem2 = new Vector2Int(point2.x + Offset,point2.y + yDif);
-        int[,] temMap = new int[100, 100];
-        for (int x = 0; x < map1.GetLength(0); x++)
+        for (int x = 0; x < PartToSet.GetLength(0); x++)
         {
-            for (int y = 0; y < map1.GetLength(1); y++)
+            for (int y = 0; y < PartToSet.GetLength(1); y++)
             {
-                if(map1[x,y] > 0)
+                if (PartToSet[x, y] > 0)
                 {
-                    temMap[x + 20, y + 20] = 1;
+                    mapToSetTo[x + universalOffset, y + universalOffset] = 1;
                 }
             }
         }
-        List<Vector2Int> map2List = new List<Vector2Int>();
-        for (int x = 0; x < map2.GetLength(0); x++)
+        return mapToSetTo;
+    }
+    int[,] SetPartToMap(int[,] mapToSetTo, List<Vector2Int> PartToSet, Vector2Int offset)
+    {
+        for (int i = 0; i < PartToSet.Count; i++)
         {
-            for (int y = 0; y < map2.GetLength(1); y++)
+            mapToSetTo[PartToSet[i].x + offset.x, PartToSet[i].y + offset.y] = 1;
+        }
+        return mapToSetTo;
+    }
+    List<Vector2Int> ConvertPartToList(List<Vector2Int> mapList, int[,] map)
+    {
+        for (int x = 0; x < map.GetLength(0); x++)
+        {
+            for (int y = 0; y < map.GetLength(1); y++)
             {
-                if(map2[x,y] > 0)
-                    map2List.Add(new Vector2Int(x, y));
+                if (map[x, y] > 0)
+                    mapList.Add(new Vector2Int(x, y));
             }
         }
+        return mapList;
+    }
+    bool PartsOverlap(int[,] temMap, List<Vector2Int> map2List, Vector2Int offset)
+    {
         bool isOverlapping = false;
-        int xOffset = Offset + 20;
-        int yOffset = yDif + 20;
-        while (isOverlapping == false)
-        {
-            for (int i = 0; i < map2List.Count; i++)
-            {
-                if (temMap[map2List[i].x + xOffset, map2List[i].y +yOffset] != 0)
-                {
-                    isOverlapping = true;
-                }
-            }
-            if(isOverlapping == false)
-                xOffset--;
-        }
-        xOffset++;
         for (int i = 0; i < map2List.Count; i++)
         {
-            temMap[map2List[i].x + xOffset, map2List[i].y + yOffset] = 1;
-            
+            if (temMap[map2List[i].x + offset.x, map2List[i].y + offset.y] != 0)
+            {
+                isOverlapping = true;
+            }
         }
-
-        temMap[point1.x + 20, point1.y + 20] = 2;
-        temMap[point2.x +xOffset, point2.y + yOffset] = 2;
-        CellPlacer cells = FindObjectOfType<CellPlacer>();
-        cells.PlaceMapCells(temMap, 0, 0);
+        return isOverlapping;
     }
 
-    void OverlapRight(int[,] map1, Vector2Int point1, int[,] map2, Vector2Int point2)
+    int[,] OverlapLeft(int[,] map1, Vector2Int point1, int[,] map2, Vector2Int point2)
+    {
+        int Offset = map1.GetLength(0);
+        int yDif =  point1.y - point2.y;
+        int UO = 50;
+
+        int[,] temMap = new int[100, 100];
+        temMap = SetPartToMap(temMap, map1, UO);
+
+        List<Vector2Int> map2List = new List<Vector2Int>();
+        map2List = ConvertPartToList(map2List, map2);
+
+        bool isOverlapping = false;
+        Vector2Int offset = new Vector2Int(Offset + UO, yDif + UO);
+
+        while (isOverlapping == false)
+        {
+            if(PartsOverlap(temMap,map2List,offset) == false)
+                offset.x--;
+            else
+                isOverlapping = true;
+        }
+        offset.x++;
+        temMap = SetPartToMap(temMap, map2List, offset);
+
+        temMap[point1.x + UO, point1.y + UO] = 2;
+        temMap[point2.x +offset.x, point2.y + offset.y] = 2;
+        return temMap;
+    }
+
+    int[,] OverlapRight(int[,] map1, Vector2Int point1, int[,] map2, Vector2Int point2)
     {
         int Offset = -map1.GetLength(0);
-
         int yDif = point1.y - point2.y;
         int UO = 50;
 
-        Vector2Int tem2 = new Vector2Int(point2.x + Offset, point2.y + yDif);
         int[,] temMap = new int[100, 100];
-        for (int x = 0; x < map1.GetLength(0); x++)
-        {
-            for (int y = 0; y < map1.GetLength(1); y++)
-            {
-                if (map1[x, y] > 0)
-                {
-                    temMap[x + UO, y + UO] = 1;
-                }
-            }
-        }
+        temMap = SetPartToMap(temMap, map1, UO);
+
         List<Vector2Int> map2List = new List<Vector2Int>();
-        for (int x = 0; x < map2.GetLength(0); x++)
-        {
-            for (int y = 0; y < map2.GetLength(1); y++)
-            {
-                if (map2[x, y] > 0)
-                    map2List.Add(new Vector2Int(x, y));
-            }
-        }
+        map2List = ConvertPartToList(map2List, map2);
+
         bool isOverlapping = false;
-        int xOffset = Offset + UO;
-        int yOffset = yDif + UO;
+        Vector2Int offset = new Vector2Int(Offset + UO, yDif + UO);
+
         while (isOverlapping == false)
         {
-            for (int i = 0; i < map2List.Count; i++)
-            {
-                if (temMap[map2List[i].x + xOffset, map2List[i].y + yOffset] != 0)
-                {
-                    isOverlapping = true;
-                }
-            }
-            if (isOverlapping == false)
-                xOffset++;
+            if (PartsOverlap(temMap, map2List, offset) == false)
+                offset.x++;
+            else
+                isOverlapping = true;
         }
-        xOffset--;
-        for (int i = 0; i < map2List.Count; i++)
-        {
-            temMap[map2List[i].x + xOffset, map2List[i].y + yOffset] = 1;
+        offset.x--;
 
-        }
+        temMap = SetPartToMap(temMap, map2List, offset);
 
         temMap[point1.x + UO, point1.y + UO] = 2;
-        temMap[point2.x + xOffset, point2.y + yOffset] = 2;
-        CellPlacer cells = FindObjectOfType<CellPlacer>();
-        cells.PlaceMapCells(temMap, 0, 0);
+        temMap[point2.x + offset.x, point2.y + offset.y] = 2;
+        return temMap;
     }
-    void OverlapBottom(int[,] map1, Vector2Int point1, int[,] map2, Vector2Int point2)
+    int[,] OverlapBottom(int[,] map1, Vector2Int point1, int[,] map2, Vector2Int point2)
     {
         int Offset = -map1.GetLength(1);
-
         int xDif = point1.x - point2.x;
         int UO = 50;
 
-        Vector2Int tem2 = new Vector2Int(point2.x + xDif, point2.y + Offset);
         int[,] temMap = new int[100, 100];
-        for (int x = 0; x < map1.GetLength(0); x++)
-        {
-            for (int y = 0; y < map1.GetLength(1); y++)
-            {
-                if (map1[x, y] > 0)
-                {
-                    temMap[x + UO, y + UO] = 1;
-                }
-            }
-        }
+        temMap = SetPartToMap(temMap, map1, UO);
+
         List<Vector2Int> map2List = new List<Vector2Int>();
-        for (int x = 0; x < map2.GetLength(0); x++)
-        {
-            for (int y = 0; y < map2.GetLength(1); y++)
-            {
-                if (map2[x, y] > 0)
-                    map2List.Add(new Vector2Int(x, y));
-            }
-        }
+        map2List = ConvertPartToList(map2List, map2);
+
         bool isOverlapping = false;
-        int xOffset = xDif + UO;
-        int yOffset = Offset + UO;
+        Vector2Int offset = new Vector2Int(xDif + UO, Offset + UO);
         while (isOverlapping == false)
         {
-            for (int i = 0; i < map2List.Count; i++)
-            {
-                if (temMap[map2List[i].x + xOffset, map2List[i].y + yOffset] != 0)
-                {
-                    isOverlapping = true;
-                }
-            }
-            if (isOverlapping == false)
-                yOffset++;
+            if (PartsOverlap(temMap, map2List, offset) == false)
+                offset.y++;
+            else
+                isOverlapping = true;
         }
-        yOffset--;
-        for (int i = 0; i < map2List.Count; i++)
-        {
-            temMap[map2List[i].x + xOffset, map2List[i].y + yOffset] = 1;
-
-        }
+        offset.y--;
+        temMap = SetPartToMap(temMap, map2List, offset);
 
         temMap[point1.x + UO, point1.y + UO] = 2;
-        temMap[point2.x + xOffset, point2.y + yOffset] = 2;
-        CellPlacer cells = FindObjectOfType<CellPlacer>();
-        cells.PlaceMapCells(temMap, 0, 0);
+        temMap[point2.x + offset.x, point2.y + offset.y] = 2;
+        return temMap;
     }
 
-    void OverlapTop(int[,] map1, Vector2Int point1, int[,] map2, Vector2Int point2)
+    int[,] OverlapTop(int[,] map1, Vector2Int point1, int[,] map2, Vector2Int point2)
     {
         int Offset = map1.GetLength(1);
-
         int xDif = point1.x - point2.x;
         int UO = 50;
 
-        Vector2Int tem2 = new Vector2Int(point2.x + xDif, point2.y + Offset);
         int[,] temMap = new int[100, 100];
-        for (int x = 0; x < map1.GetLength(0); x++)
-        {
-            for (int y = 0; y < map1.GetLength(1); y++)
-            {
-                if (map1[x, y] > 0)
-                {
-                    temMap[x + UO, y + UO] = 1;
-                }
-            }
-        }
+        temMap = SetPartToMap(temMap, map1, UO);
+
         List<Vector2Int> map2List = new List<Vector2Int>();
-        for (int x = 0; x < map2.GetLength(0); x++)
-        {
-            for (int y = 0; y < map2.GetLength(1); y++)
-            {
-                if (map2[x, y] > 0)
-                    map2List.Add(new Vector2Int(x, y));
-            }
-        }
+        map2List = ConvertPartToList(map2List, map2);
+
         bool isOverlapping = false;
-        int xOffset = xDif + UO;
-        int yOffset = Offset + UO;
+        Vector2Int offset = new Vector2Int(xDif + UO, Offset + UO);
         while (isOverlapping == false)
         {
-            for (int i = 0; i < map2List.Count; i++)
-            {
-                if (temMap[map2List[i].x + xOffset, map2List[i].y + yOffset] != 0)
-                {
-                    isOverlapping = true;
-                }
-            }
-            if (isOverlapping == false)
-                yOffset--;
+            if (PartsOverlap(temMap, map2List, offset) == false)
+                offset.y--;
+            else
+                isOverlapping = true;
         }
-        yOffset++;
-        for (int i = 0; i < map2List.Count; i++)
-        {
-            temMap[map2List[i].x + xOffset, map2List[i].y + yOffset] = 1;
-
-        }
+        offset.y++;
+        temMap = SetPartToMap(temMap, map2List, offset);
 
         temMap[point1.x + UO, point1.y + UO] = 2;
-        temMap[point2.x + xOffset, point2.y + yOffset] = 2;
-        CellPlacer cells = FindObjectOfType<CellPlacer>();
-        cells.PlaceMapCells(temMap, 0, 0);
+        temMap[point2.x + offset.x, point2.y + offset.y] = 2;
+        return temMap;
     }
-
 
     enum LRTB
     {
