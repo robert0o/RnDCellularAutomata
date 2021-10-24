@@ -318,9 +318,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapGen: {fileID: 958518461}
-  xRange: 2
-  yRange: 2
-  Seed: -2,431684E+38
+  xRange: 4
+  yRange: 4
+  Seed: 2,96115E+38
   randomSeed: 1
   maxIterations: 10
   startIteration: 3
