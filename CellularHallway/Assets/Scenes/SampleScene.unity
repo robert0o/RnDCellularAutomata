@@ -248,6 +248,7 @@ GameObject:
   - component: {fileID: 958518461}
   - component: {fileID: 958518463}
   - component: {fileID: 958518464}
+  - component: {fileID: 958518465}
   m_Layer: 0
   m_Name: Map gen
   m_TagString: Untagged
@@ -312,7 +313,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 958518460}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3134c31b298513d43833c7cabaad8723, type: 3}
   m_Name: 
@@ -321,6 +322,22 @@ MonoBehaviour:
   xRange: 4
   yRange: 4
   Seed: 2,96115E+38
-  randomSeed: 1
+  randomSeed: 0
   maxIterations: 10
   startIteration: 3
+--- !u!114 &958518465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 958518460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26fe52bf58c9a824b888124830582e1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xRange: 3
+  yRange: 3
+  Seed: Test
+  randomSeed: 0
