@@ -105,6 +105,19 @@ public class MapPlacer2 : MonoBehaviour
     {
         int currentPart = layout[position.x, position.y];
         Vector2Int[] directions = { Vector2Int.left, Vector2Int.right, Vector2Int.up, Vector2Int.down };
+        
+        //somehow messes stuff up
+        List<int> dirs = new List<int>();
+        for (int i = 0; i < directions.Length; i++){
+            dirs.Add(i);}
+        int[] rngDir = new int[dirs.Count];
+        for (int i = 0; i < rngDir.Length; i++){
+            int j = rng.Next(0, dirs.Count - 1);
+            rngDir[i] = j;
+            dirs.Remove(dirs[j]);
+        }
+
+
         for (int i = 0; i < 4; i++)
         {
             Vector2Int newPos = position + directions[i];
