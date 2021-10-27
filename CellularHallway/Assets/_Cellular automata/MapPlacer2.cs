@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+using System.Security.Cryptography;
 
 public class MapPlacer2 : MonoBehaviour
 {
@@ -18,6 +20,7 @@ public class MapPlacer2 : MonoBehaviour
     int[,] totalMap;
     int[,] mapsVisited;
     int[,] layout;
+    
 
     Queue<Vector2Int[]> partQueue;
 
@@ -50,8 +53,17 @@ public class MapPlacer2 : MonoBehaviour
         totalSections = xRange * yRange;
         mapGen = FindObjectOfType<MapGenerator>();
         int iterate = 3;
+        
         while (maps.Count <= totalSections)
         {
+            if(iterate >= 10){
+                Seed = "";
+                for (int i = 0; i < 10; i++){
+                    char ch = (char)rng.Next(0, 255);
+                    Seed += ch.ToString();
+                    iterate = 3;
+                }
+            }
             List<int[,]> _maps = mapGen.GetMaps(Seed, iterate);
             for (int j = 0; j < _maps.Count; j++)
             {
@@ -79,7 +91,7 @@ public class MapPlacer2 : MonoBehaviour
             for (int y = 0; y < yRange; y++){
                 int partNr = rng.Next(0, parts.Count);
                 layout[x, y] = parts[partNr];
-                parts.Remove(partNr);
+                parts.Remove(parts[partNr]);
             }
         }
 
@@ -105,6 +117,22 @@ public class MapPlacer2 : MonoBehaviour
     {
         int currentPart = layout[position.x, position.y];
         Vector2Int[] directions = { Vector2Int.left, Vector2Int.right, Vector2Int.up, Vector2Int.down };
+        int[] index = { 0, 1, 2, 3 };
+        //System.Array.Sort(directions,);
+        directions = directions.OrderBy(x => rng.Next()).ToArray();
+
+        //somehow messes stuff up
+        List<int> dirs = new List<int>();
+        for (int i = 0; i < directions.Length; i++){
+            dirs.Add(i);}
+        int[] rngDir = new int[dirs.Count];
+        for (int i = 0; i < rngDir.Length; i++){
+            int j = rng.Next(0, dirs.Count - 1);
+            rngDir[i] = j;
+            dirs.Remove(dirs[j]);
+        }
+
+
         for (int i = 0; i < 4; i++)
         {
             Vector2Int newPos = position + directions[i];
@@ -238,6 +266,7 @@ public class MapPlacer2 : MonoBehaviour
         }
         return new MinMax(xMin, yMin, xMax, yMax);
     }
+
     enum Axis {
         LEFT,
         RIGHT,
