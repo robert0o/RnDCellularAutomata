@@ -18,6 +18,16 @@ public class CellScript : MonoBehaviour
             sprite.color = colors[1];
             text.text = "1";
         }
+        else if (distanceValue == 2)
+        {
+            sprite.color = colors[2];
+            text.text = "2";
+        }
+        else if (distanceValue == 4)
+        {
+            sprite.color = colors[4];
+            text.text = "4";
+        }
         else if (distanceValue < short.MaxValue) {
             sprite.color = colors[2];
             text.text = "" + distanceValue.ToString();

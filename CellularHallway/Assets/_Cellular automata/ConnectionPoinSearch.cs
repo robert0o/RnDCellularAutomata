@@ -5,13 +5,15 @@ using UnityEngine;
 public class ConnectionPoinSearch
 {
     int startingX, startingY;
+    List<Vector2Int> endPointList;
     
     public int[,] findEnds(int [,] invertedMap)
     {
         int[,] newMap = new int[invertedMap.GetLength(0), invertedMap.GetLength(1)];
         int[,] visitedMap = new int[invertedMap.GetLength(0), invertedMap.GetLength(1)];
         Queue<Vector3Int> PointsToLookAt = new Queue<Vector3Int>();
-        
+        endPointList = new List<Vector2Int>();
+
         int yMid = Mathf.RoundToInt((invertedMap.GetLength(1)-1) / 2f);
         int xStart, yStart;
 
@@ -61,6 +63,7 @@ public class ConnectionPoinSearch
             if (isEndPoint == true)
             {
                 endPoints.Enqueue(node);
+                
             }
         }
         
@@ -74,6 +77,7 @@ public class ConnectionPoinSearch
         int[,] endMap = travelMap;
         int[,] visitedMap = new int[travelMap.GetLength(0), travelMap.GetLength(1)];
         Queue<Vector3Int> endQueue = new Queue<Vector3Int>();
+        
 
         while (endpoints.Count > 0)
         {
@@ -105,6 +109,7 @@ public class ConnectionPoinSearch
             }
             if (hasHigherOrEqualNeighbor == false)
             {
+                endPointList.Add(new Vector2Int(node.x, node.y));
                 endMap[node.x, node.y] = short.MaxValue + node.z;
             }
         }
@@ -130,6 +135,10 @@ public class ConnectionPoinSearch
                 break;
         }
         return xny;
+    }
+    public List<Vector2Int> GetEndPointsPosition()
+    {
+        return (endPointList == null) ? null : endPointList;
     }
 }
 

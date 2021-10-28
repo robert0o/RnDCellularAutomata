@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 public class MapPlacer2 : MonoBehaviour
 {
     MapGenerator mapGen;
+    ConnectionPoinSearch point;
     int[,] levelMap;
     [Range(3, 10)]
     public int xRange =3, yRange=3;
@@ -20,7 +21,8 @@ public class MapPlacer2 : MonoBehaviour
     int[,] totalMap;
     int[,] mapsVisited;
     int[,] layout;
-    
+    List<int> usedRooms;
+    List<int> eventRooms;
 
     Queue<Vector2Int[]> partQueue;
 
@@ -37,11 +39,23 @@ public class MapPlacer2 : MonoBehaviour
     }
     public void Start()
     {
+        usedRooms = new List<int>();
+        eventRooms = new List<int>();
         if (randomSeed == true) Seed = Random.Range(float.MinValue, float.MaxValue).ToString();
         rng = new System.Random(Seed.GetHashCode());
+
         GetMapGenData();
+
         StructureMap();
+
         totalMap = TrimMap(totalMap);
+
+        point = new ConnectionPoinSearch();
+        int[,] pathedMap = point.findEnds(totalMap);
+        AddEndpoints();
+
+        
+
         FindObjectOfType<CellPlacer>().PlaceMapCells(totalMap, 0, 0);
     }
 
@@ -84,20 +98,13 @@ public class MapPlacer2 : MonoBehaviour
 
         mapsVisited = new int[xRange, yRange];
 
-        layout = new int[xRange, yRange];
-        List<int> parts = new List<int>();
-        for (int i = 0; i < maps.Count; i++) {parts.Add(i);}
-        for (int x = 0; x < xRange; x++){
-            for (int y = 0; y < yRange; y++){
-                int partNr = rng.Next(0, parts.Count);
-                layout[x, y] = parts[partNr];
-                parts.Remove(parts[partNr]);
-            }
-        }
+        CreateLayout();
+        SetEventToRoom(4); //banditcampish
+        SetEventToRoom(2); //startingRoom
+       
 
         partQueue = new Queue<Vector2Int[]>();
 
-        //int midX = Mathf.CeilToInt((xRange - 1) * 0.5f), midY = Mathf.CeilToInt((yRange - 1) * 0.5f);
         int midX = rng.Next(0,xRange-1), midY = Mathf.CeilToInt(rng.Next(0, yRange - 1));
         Vector2Int layoutPosition = new Vector2Int(midX, midY);
         mapsVisited[layoutPosition.x, layoutPosition.y] = 1;
@@ -109,11 +116,29 @@ public class MapPlacer2 : MonoBehaviour
         while (partQueue.Count > 0)
         {
             Vector2Int[] inQVector = partQueue.Dequeue();
-            SubStructureMap(inQVector[0], inQVector[1]);
+            PlaceStructuredMap(inQVector[0], inQVector[1]);
         }
     }
 
-    void SubStructureMap(Vector2Int position,Vector2Int offset)
+    void CreateLayout()
+    {
+        layout = new int[xRange, yRange];
+        usedRooms = new List<int>();
+        List<int> parts = new List<int>();
+        for (int i = 0; i < maps.Count; i++) { parts.Add(i); }
+        for (int x = 0; x < xRange; x++)
+        {
+            for (int y = 0; y < yRange; y++)
+            {
+                int partNr = rng.Next(0, parts.Count-1);
+                layout[x, y] = parts[partNr];
+                parts.Remove(parts[partNr]);
+                usedRooms.Add(parts[partNr]);
+            }
+        }
+    }
+
+    void PlaceStructuredMap(Vector2Int position,Vector2Int offset)
     {
         int currentPart = layout[position.x, position.y];
         Vector2Int[] directions = { Vector2Int.left, Vector2Int.right, Vector2Int.up, Vector2Int.down };
@@ -144,6 +169,7 @@ public class MapPlacer2 : MonoBehaviour
             int nextPart = layout[newPos.x, newPos.y];
             newOffset = newOffset + GetOverlapOffset(maps[currentPart], maps[nextPart], directions[i]);
             mapsVisited[newPos.x, newPos.y] = 1;
+
             SetPartToMap(maps[nextPart], newOffset);
             Vector2Int[] qVector = { newPos, newOffset };
             partQueue.Enqueue(qVector);
@@ -155,7 +181,7 @@ public class MapPlacer2 : MonoBehaviour
         for (int x = 0; x < part.GetLength(0); x++){
             for (int y = 0; y < part.GetLength(1); y++){
                 if (part[x, y] <= 0) continue;
-                totalMap[x + offset.x, y + offset.y] = 1/*part[x, y]*/;
+                totalMap[x + offset.x, y + offset.y] = part[x, y];
             }
         }
     }
@@ -222,13 +248,13 @@ public class MapPlacer2 : MonoBehaviour
         MinMax mm = GetMinMax(map);
         int xLength = mm.Max.x - mm.Min.x, yLength = mm.Max.y - mm.Min.y;
 
-        int[,] trimmedMap = new int[xLength, yLength];
+        int[,] trimmedMap = new int[xLength+2, yLength+2];
         for (int x = 0; x < xLength; x++)
         {
             for (int y = 0; y < yLength; y++)
             {
                 if (map[mm.Min.x + x, mm.Min.y + y] > 0)
-                    trimmedMap[x, y] = 1;
+                    trimmedMap[x+1, y+1] = map[mm.Min.x + x, mm.Min.y + y];
             }
         }
         return trimmedMap;
@@ -266,37 +292,36 @@ public class MapPlacer2 : MonoBehaviour
         }
         return new MinMax(xMin, yMin, xMax, yMax);
     }
-
-    enum Axis {
-        LEFT,
-        RIGHT,
-        UP,
-        DOWN,
-        LEFTUP,
-        RIGHTUP,
-        LEFTDOWN,
-        RIGHTDOWN
-    }
-    Vector2Int GetAxisVector(int axis)
+    void AddEndpoints()
     {
-        switch (axis)
+        if (point == null) return;
+        List<Vector2Int> ends = point.GetEndPointsPosition();
+        if (ends == null) return;
+        for (int i = 0; i < ends.Count; i++)
         {
-            case 0:
-                return Vector2Int.left;
-            case 1:
-                return Vector2Int.right;
-            case 2:
-                return Vector2Int.up;
-            case 3:
-                return Vector2Int.down;
-            case 4:
-                return (Vector2Int.left + Vector2Int.up);
-            case 5:
-                return (Vector2Int.right + Vector2Int.up);
-            case 6:
-                return (Vector2Int.left + Vector2Int.down);
-            default:
-                return (Vector2Int.right + Vector2Int.down);
+            totalMap[ends[i].x, ends[i].y] = 3;
+        }
+    }
+    void SetEventToRoom(int eventIndex)
+    {
+        int eventRoom;
+
+        int index = rng.Next(0, usedRooms.Count - 1);
+        eventRoom = usedRooms[index];
+        usedRooms.Remove(usedRooms[index]);
+            
+        eventRooms.Add(eventRoom);
+        setRoomValue(eventRoom, eventIndex);
+    }
+    void setRoomValue(int eventRoom,int eventIndex)
+    {
+        for (int x = 0; x < maps[eventRoom].GetLength(0); x++)
+        {
+            for (int y = 0; y < maps[eventRoom].GetLength(1); y++)
+            {
+                if (maps[eventRoom][x, y] <= 0) continue;
+                maps[eventRoom][x, y] = eventIndex;
+            }
         }
     }
 }
