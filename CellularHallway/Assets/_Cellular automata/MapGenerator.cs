@@ -23,10 +23,6 @@ public class MapGenerator : MonoBehaviour
     public int[] rules = new int[9];
     List<int[,]> hallways;
 
-    public void Start()
-    {
-        //List<int[,]> Mapzzz= GetMaps(seed, iterations);
-    }
     public List<int[,]> GetMaps(string _seed, int _iterations)
     {
         seed = _seed;

@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe20807f94517a348ac5fdd8c503a298, type: 3}
+  m_Name: ColorEvent
+  m_EditorClassIdentifier: 
+  eventList:
+  - eventName: 0_Wall
+    eventColor: {r: 0, g: 0, b: 0, a: 1}
+  - eventName: 1_EmptySpace
+    eventColor: {r: 1, g: 1, b: 1, a: 1}
+  - eventName: 2_StartingZone
+    eventColor: {r: 0.49844232, g: 0.745283, b: 0.4745906, a: 1}
+  - eventName: 3_EndPoints
+    eventColor: {r: 0, g: 0.826087, b: 1, a: 1}
+  - eventName: 4_Event1
+    eventColor: {r: 0.3224012, g: 0.33737847, b: 0.6509434, a: 1}
+  - eventName: 5_Event2
+    eventColor: {r: 0.50870544, g: 0.3215686, b: 0.6509804, a: 1}
+  - eventName: 6_Event3
+    eventColor: {r: 0.6509804, g: 0.3215686, b: 0.37504977, a: 1}
+  - eventName: 7_Event4
+    eventColor: {r: 0.6509804, g: 0.49024072, b: 0.3215686, a: 1}

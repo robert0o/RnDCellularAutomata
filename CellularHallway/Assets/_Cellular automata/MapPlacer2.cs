@@ -9,10 +9,17 @@ public class MapPlacer2 : MonoBehaviour
     MapGenerator mapGen;
     ConnectionPoinSearch point;
     int[,] levelMap;
+
     [Range(3, 10)]
     public int xRange =3, yRange=3;
     public string Seed;
     public bool randomSeed;
+
+    [Header("EventPlacement")]
+    [Range(0, 10)]
+    public int maxEvents = 0;
+    public bool repeatableEvents = false;
+
     System.Random rng;
 
     int totalSections;
@@ -25,6 +32,7 @@ public class MapPlacer2 : MonoBehaviour
     List<int> eventRooms;
 
     Queue<Vector2Int[]> partQueue;
+    public EventValues EV;
 
     struct MinMax
     {
@@ -39,8 +47,6 @@ public class MapPlacer2 : MonoBehaviour
     }
     public void Start()
     {
-        usedRooms = new List<int>();
-        eventRooms = new List<int>();
         if (randomSeed == true) Seed = Random.Range(float.MinValue, float.MaxValue).ToString();
         rng = new System.Random(Seed.GetHashCode());
 
@@ -99,9 +105,8 @@ public class MapPlacer2 : MonoBehaviour
         mapsVisited = new int[xRange, yRange];
 
         CreateLayout();
-        SetEventToRoom(4); //banditcampish
-        SetEventToRoom(2); //startingRoom
-       
+
+        SetEventsInMap();
 
         partQueue = new Queue<Vector2Int[]>();
 
@@ -133,7 +138,49 @@ public class MapPlacer2 : MonoBehaviour
                 int partNr = rng.Next(0, parts.Count-1);
                 layout[x, y] = parts[partNr];
                 parts.Remove(parts[partNr]);
-                usedRooms.Add(parts[partNr]);
+            }
+        }
+    }
+    void SetEventsInMap()
+    {
+        getUsedRooms();
+        if (repeatableEvents == true)
+            SetRepeatEvents();
+        else
+            SetNonRepeatEvents();
+
+        SetEventToRoom(2); //startingRoom
+    }
+    void SetRepeatEvents()
+    {
+        int startPointEvents = 4; int endPointEvents = 7;
+        int eventLimit = (maxEvents < usedRooms.Count -1) ? maxEvents : usedRooms.Count - 1;
+        for (int i = 0; i < eventLimit; i++)
+        {
+            int nr = rng.Next(startPointEvents, endPointEvents);
+            SetEventToRoom(nr);
+        }
+    }
+    void SetNonRepeatEvents()
+    {
+        int[] eventNR = { 4, 5, 6, 7 };
+        int eventLimit = (maxEvents < eventNR.Length) ? maxEvents : eventNR.Length;
+        eventNR = eventNR.OrderBy(x => rng.Next()).ToArray();
+        for (int i = 0; i < eventLimit; i++)
+        {
+            SetEventToRoom(eventNR[i]);
+        }
+    }
+
+    void getUsedRooms()
+    {
+        usedRooms = new List<int>();
+        eventRooms = new List<int>();
+        for (int x = 0; x < xRange; x++)
+        {
+            for (int y = 0; y < yRange; y++)
+            {
+                usedRooms.Add(layout[x, y]);
             }
         }
     }
@@ -297,10 +344,12 @@ public class MapPlacer2 : MonoBehaviour
         if (point == null) return;
         List<Vector2Int> ends = point.GetEndPointsPosition();
         if (ends == null) return;
-        for (int i = 0; i < ends.Count; i++)
+        Vector2Int endPoint = ends[rng.Next(0, ends.Count - 1)];
+        totalMap[endPoint.x,endPoint.y] = 3;
+        /*for (int i = 0; i < ends.Count; i++)
         {
             totalMap[ends[i].x, ends[i].y] = 3;
-        }
+        }//*/
     }
     void SetEventToRoom(int eventIndex)
     {

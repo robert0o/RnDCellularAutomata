@@ -5,38 +5,14 @@ using UnityEngine;
 public class CellScript : MonoBehaviour
 {
     public TextMesh text;
-    public Color[] colors = new Color[3];
+    public EventValues EV;
     public SpriteRenderer sprite;
 
-    public void InitCell(int distanceValue, Vector3 pos)
+    public void InitCell(int cellType, Vector3 pos)
     {
-        if(distanceValue == 0) {
-            sprite.color = colors[0];
-            text.text = "" + distanceValue.ToString();
-        }
-        else if (distanceValue == 1) {
-            sprite.color = colors[1];
-            text.text = "1";
-        }
-        else if (distanceValue == 2)
-        {
-            sprite.color = colors[2];
-            text.text = "2";
-        }
-        else if (distanceValue == 4)
-        {
-            sprite.color = colors[4];
-            text.text = "4";
-        }
-        else if (distanceValue < short.MaxValue) {
-            sprite.color = colors[2];
-            text.text = "" + distanceValue.ToString();
-        }
-        else if (distanceValue > short.MaxValue) {
-            sprite.color = colors[3];
-            int newDistV = distanceValue - short.MaxValue;
-            text.text = "" + newDistV.ToString();
-        }
+        if (cellType > EV.eventList.Length - 1) return;
+        sprite.color = EV.eventList[cellType].eventColor;
+        text.text = "" + cellType.ToString();
         transform.position = pos;
     }
 }
