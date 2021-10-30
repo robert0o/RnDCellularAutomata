@@ -12,6 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe20807f94517a348ac5fdd8c503a298, type: 3}
   m_Name: ColorEvent
   m_EditorClassIdentifier: 
+  eventStartIndex: 5
+  eventEndIndex: 7
   eventList:
   - eventName: 0_Wall
     eventColor: {r: 0, g: 0, b: 0, a: 1}
@@ -21,7 +23,7 @@ MonoBehaviour:
     eventColor: {r: 0.49844232, g: 0.745283, b: 0.4745906, a: 1}
   - eventName: 3_EndPoints
     eventColor: {r: 0, g: 0.826087, b: 1, a: 1}
-  - eventName: 4_Event1
+  - eventName: 4_Key
     eventColor: {r: 0.3224012, g: 0.33737847, b: 0.6509434, a: 1}
   - eventName: 5_Event2
     eventColor: {r: 0.50870544, g: 0.3215686, b: 0.6509804, a: 1}

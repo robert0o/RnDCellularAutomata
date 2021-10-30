@@ -19,6 +19,7 @@ public class MapPlacer2 : MonoBehaviour
     [Range(0, 10)]
     public int maxEvents = 0;
     public bool repeatableEvents = false;
+    public int keyMinDistance;
 
     System.Random rng;
 
@@ -153,7 +154,7 @@ public class MapPlacer2 : MonoBehaviour
     }
     void SetRepeatEvents()
     {
-        int startPointEvents = 4; int endPointEvents = 7;
+        int startPointEvents = EV.eventStartIndex; int endPointEvents = EV.eventEndIndex;
         int eventLimit = (maxEvents < usedRooms.Count -1) ? maxEvents : usedRooms.Count - 1;
         for (int i = 0; i < eventLimit; i++)
         {
@@ -163,7 +164,13 @@ public class MapPlacer2 : MonoBehaviour
     }
     void SetNonRepeatEvents()
     {
-        int[] eventNR = { 4, 5, 6, 7 };
+        int startPointEvents = EV.eventStartIndex; int endPointEvents = EV.eventEndIndex;
+        int[] eventNR = new int[EV.eventList.Length - startPointEvents];
+        for (int i = 0; i < eventNR.Length; i++)
+        {
+            eventNR[i] = startPointEvents + i;
+        }
+
         int eventLimit = (maxEvents < eventNR.Length) ? maxEvents : eventNR.Length;
         eventNR = eventNR.OrderBy(x => rng.Next()).ToArray();
         for (int i = 0; i < eventLimit; i++)
@@ -346,10 +353,11 @@ public class MapPlacer2 : MonoBehaviour
         if (ends == null) return;
         Vector2Int endPoint = ends[rng.Next(0, ends.Count - 1)];
         totalMap[endPoint.x,endPoint.y] = 3;
-        /*for (int i = 0; i < ends.Count; i++)
-        {
-            totalMap[ends[i].x, ends[i].y] = 3;
-        }//*/
+
+        List<Vector2Int> keys = point.GetKeyPositions(totalMap,endPoint,keyMinDistance);
+        if (keys.Count <= 0) return;
+        Vector2Int keyPoint = keys[rng.Next(0, keys.Count - 1)];
+        totalMap[keyPoint.x, keyPoint.y] = 4;//*/
     }
     void SetEventToRoom(int eventIndex)
     {

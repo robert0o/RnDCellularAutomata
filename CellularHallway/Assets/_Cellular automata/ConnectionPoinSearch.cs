@@ -116,6 +116,43 @@ public class ConnectionPoinSearch
 
         return endMap;
     }
+
+    public List<Vector2Int> GetKeyPositions(int[,] lockMap, Vector2Int lockPosition, int minDistance)
+    {
+        Queue<Vector3Int> nodeQue = new Queue<Vector3Int>();
+        List<Vector2Int> keyPositions = new List<Vector2Int>();
+        int width = lockMap.GetLength(0);
+        int length = lockMap.GetLength(1);
+        int[,] visitedMap = new int[width, length];
+        Vector3Int[] dir = { Vector3Int.left, Vector3Int.right, Vector3Int.up, Vector3Int.down };
+
+        nodeQue.Enqueue(new Vector3Int(lockPosition.x,lockPosition.y,1));
+        visitedMap[lockPosition.x, lockPosition.y] = 1;
+        Vector3Int node;
+
+        while (nodeQue.Count  > 0)
+        {
+            node = nodeQue.Dequeue();
+            
+            for (int i = 0; i < dir.Length; i++)
+            {
+                Vector2Int pos = new Vector2Int(node.x + dir[i].x, node.y + dir[i].y);
+                if (IsInMap(width, length, pos) == false) continue; 
+                if( visitedMap[pos.x,pos.y] == 1 || lockMap[pos.x, pos.y] == 0) continue;
+                if (node.z + 1 >= minDistance)
+                    keyPositions.Add(new Vector2Int(node.x, node.y));
+                visitedMap[pos.x, pos.y] = 1;
+                nodeQue.Enqueue(node + dir[i]+Vector3Int.forward);
+            }
+        }
+        return keyPositions;
+    }
+
+    bool IsInMap(int width,int length, Vector2Int pos)
+    {
+        return (pos.x >= 0 && pos.x < width && pos.y >= 0 && pos.y < length);
+    }
+
     Vector2Int LookNext(int x, int y, int iteration)
     {
         Vector2Int xny = new Vector2Int(x,y);
