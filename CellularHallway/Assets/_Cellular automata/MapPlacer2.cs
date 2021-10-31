@@ -21,7 +21,7 @@ public class MapPlacer2 : MonoBehaviour
     public bool repeatableEvents = false;
     public int keyMinDistance;
 
-    System.Random rng;
+    public RNGSeed rng;
 
     int totalSections;
     List<int[,]> maps;
@@ -30,7 +30,6 @@ public class MapPlacer2 : MonoBehaviour
     int[,] mapsVisited;
     int[,] layout;
     List<int> usedRooms;
-    List<int> eventRooms;
 
     Queue<Vector2Int[]> partQueue;
     public EventValues EV;
@@ -49,7 +48,7 @@ public class MapPlacer2 : MonoBehaviour
     public void Start()
     {
         if (randomSeed == true) Seed = Random.Range(float.MinValue, float.MaxValue).ToString();
-        rng = new System.Random(Seed.GetHashCode());
+        rng.setSeed(Seed.GetHashCode());
 
         GetMapGenData();
 
@@ -60,7 +59,6 @@ public class MapPlacer2 : MonoBehaviour
         point = new ConnectionPoinSearch();
         int[,] pathedMap = point.findEnds(totalMap);
         AddEndpoints();
-
         
 
         FindObjectOfType<CellPlacer>().PlaceMapCells(totalMap, 0, 0);
@@ -129,14 +127,14 @@ public class MapPlacer2 : MonoBehaviour
     void CreateLayout()
     {
         layout = new int[xRange, yRange];
-        usedRooms = new List<int>();
+        
         List<int> parts = new List<int>();
         for (int i = 0; i < maps.Count; i++) { parts.Add(i); }
         for (int x = 0; x < xRange; x++)
         {
             for (int y = 0; y < yRange; y++)
             {
-                int partNr = rng.Next(0, parts.Count-1);
+                int partNr = rng.Next(0, parts.Count);
                 layout[x, y] = parts[partNr];
                 parts.Remove(parts[partNr]);
             }
@@ -154,21 +152,19 @@ public class MapPlacer2 : MonoBehaviour
     }
     void SetRepeatEvents()
     {
-        int startPointEvents = EV.eventStartIndex; int endPointEvents = EV.eventEndIndex;
         int eventLimit = (maxEvents < usedRooms.Count -1) ? maxEvents : usedRooms.Count - 1;
         for (int i = 0; i < eventLimit; i++)
         {
-            int nr = rng.Next(startPointEvents, endPointEvents);
+            int nr = rng.Next(EV.eventStartIndex, EV.eventList.Length);
             SetEventToRoom(nr);
         }
     }
     void SetNonRepeatEvents()
     {
-        int startPointEvents = EV.eventStartIndex; int endPointEvents = EV.eventEndIndex;
-        int[] eventNR = new int[EV.eventList.Length - startPointEvents];
+        int[] eventNR = new int[EV.eventList.Length - EV.eventStartIndex];
         for (int i = 0; i < eventNR.Length; i++)
         {
-            eventNR[i] = startPointEvents + i;
+            eventNR[i] = EV.eventStartIndex + i;
         }
 
         int eventLimit = (maxEvents < eventNR.Length) ? maxEvents : eventNR.Length;
@@ -182,7 +178,6 @@ public class MapPlacer2 : MonoBehaviour
     void getUsedRooms()
     {
         usedRooms = new List<int>();
-        eventRooms = new List<int>();
         for (int x = 0; x < xRange; x++)
         {
             for (int y = 0; y < yRange; y++)
@@ -206,7 +201,7 @@ public class MapPlacer2 : MonoBehaviour
             dirs.Add(i);}
         int[] rngDir = new int[dirs.Count];
         for (int i = 0; i < rngDir.Length; i++){
-            int j = rng.Next(0, dirs.Count - 1);
+            int j = rng.Next(0, dirs.Count);
             rngDir[i] = j;
             dirs.Remove(dirs[j]);
         }
@@ -351,23 +346,22 @@ public class MapPlacer2 : MonoBehaviour
         if (point == null) return;
         List<Vector2Int> ends = point.GetEndPointsPosition();
         if (ends == null) return;
-        Vector2Int endPoint = ends[rng.Next(0, ends.Count - 1)];
+        Vector2Int endPoint = ends[rng.Next(0, ends.Count)];
         totalMap[endPoint.x,endPoint.y] = 3;
 
         List<Vector2Int> keys = point.GetKeyPositions(totalMap,endPoint,keyMinDistance);
         if (keys.Count <= 0) return;
-        Vector2Int keyPoint = keys[rng.Next(0, keys.Count - 1)];
+        Vector2Int keyPoint = keys[rng.Next(0, keys.Count)];
         totalMap[keyPoint.x, keyPoint.y] = 4;//*/
     }
     void SetEventToRoom(int eventIndex)
     {
         int eventRoom;
 
-        int index = rng.Next(0, usedRooms.Count - 1);
+        int index = rng.Next(0, usedRooms.Count);
         eventRoom = usedRooms[index];
         usedRooms.Remove(usedRooms[index]);
             
-        eventRooms.Add(eventRoom);
         setRoomValue(eventRoom, eventIndex);
     }
     void setRoomValue(int eventRoom,int eventIndex)

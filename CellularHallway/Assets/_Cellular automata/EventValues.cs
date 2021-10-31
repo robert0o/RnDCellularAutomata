@@ -6,7 +6,6 @@ using UnityEngine;
 public class EventValues : ScriptableObject
 {
     public int eventStartIndex;
-    public int eventEndIndex;
     [SerializeField]
     public anEvent[] eventList;
 

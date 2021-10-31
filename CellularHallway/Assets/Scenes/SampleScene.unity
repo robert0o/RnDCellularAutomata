@@ -339,9 +339,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xRange: 3
   yRange: 3
-  Seed: -4,487908E+37
+  Seed: 7,904204E+37
   randomSeed: 1
   maxEvents: 10
   repeatableEvents: 0
-  keyMinDistance: 48
+  keyMinDistance: 30
+  rng: {fileID: 11400000, guid: c9ec8e7d33be60c48868f6c9a2e9d12c, type: 2}
   EV: {fileID: 11400000, guid: 3895fcc7eb0888441a4579ba4002b5ba, type: 2}
