@@ -12,6 +12,7 @@ public class CellScript : MonoBehaviour
     {
         if (cellType > EV.eventList.Length - 1) return;
         sprite.color = EV.eventList[cellType].eventColor;
+        
         text.text = "" + cellType.ToString();
         transform.position = pos;
     }

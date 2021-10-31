@@ -8,6 +8,7 @@ public class MapPlacer2 : MonoBehaviour
 {
     MapGenerator mapGen;
     ConnectionPoinSearch point;
+    DetailedEventPlacer detailedEvent;
     int[,] levelMap;
 
     [Range(3, 10)]
@@ -49,6 +50,7 @@ public class MapPlacer2 : MonoBehaviour
     {
         if (randomSeed == true) Seed = Random.Range(float.MinValue, float.MaxValue).ToString();
         rng.setSeed(Seed.GetHashCode());
+        detailedEvent = new DetailedEventPlacer(rng);
 
         GetMapGenData();
 
@@ -361,8 +363,22 @@ public class MapPlacer2 : MonoBehaviour
         int index = rng.Next(0, usedRooms.Count);
         eventRoom = usedRooms[index];
         usedRooms.Remove(usedRooms[index]);
-            
-        setRoomValue(eventRoom, eventIndex);
+        switch (eventIndex)
+        {
+            case 5:
+                maps[eventRoom] = detailedEvent.SetEvent1(maps[eventRoom], eventIndex);
+                break;
+            case 6:
+                setRoomValue(eventRoom, eventIndex);
+                break;
+            case 7:
+                setRoomValue(eventRoom, eventIndex);
+                break;
+            default:
+                setRoomValue(eventRoom, eventIndex);
+                break;
+        }//*/
+        //setRoomValue(eventRoom, eventIndex);
     }
     void setRoomValue(int eventRoom,int eventIndex)
     {

@@ -7,37 +7,17 @@ public class ConnectionPoinSearch
     int startingX, startingY;
     List<Vector2Int> endPointList;
     
-    public int[,] findEnds(int [,] invertedMap)
+    public int[,] findEnds(int [,] map)
     {
-        int[,] newMap = new int[invertedMap.GetLength(0), invertedMap.GetLength(1)];
-        int[,] visitedMap = new int[invertedMap.GetLength(0), invertedMap.GetLength(1)];
+        int[,] newMap = new int[map.GetLength(0), map.GetLength(1)];
+        int[,] visitedMap = new int[map.GetLength(0), map.GetLength(1)];
         Queue<Vector3Int> PointsToLookAt = new Queue<Vector3Int>();
         endPointList = new List<Vector2Int>();
-
-        int yMid = Mathf.RoundToInt((invertedMap.GetLength(1)-1) / 2f);
-        int xStart, yStart;
-
-        List<int> xOpenSpaces = new List<int>();
-        List<int> yOpenSpaces = new List<int>();
-        for (int x = 0; x < invertedMap.GetLength(0); x++)
-        {
-            if (invertedMap[x, yMid] > 0)
-                xOpenSpaces.Add(x);
-        }
-        int middleXopenspaces = Mathf.RoundToInt((xOpenSpaces.Count -1) / 2f);
-        int middleX = xOpenSpaces[middleXopenspaces];
-        for (int y = 0; y < invertedMap.GetLength(1); y++)
-        {
-            if (invertedMap[middleX, y] > 0)
-            {
-                yOpenSpaces.Add(y);
-            }
-        }
-        int middleY = yOpenSpaces[Mathf.RoundToInt((yOpenSpaces.Count -1) / 2f)];
-        xStart = middleX;
-        yStart = middleY;
-        PointsToLookAt.Enqueue(new Vector3Int(xStart, yStart,1));
-        newMap[xStart, yStart] = 1;
+        //
+        Vector2Int startingPos = LookForMiddle(map);
+        //
+        PointsToLookAt.Enqueue(new Vector3Int(startingPos.x, startingPos.y, 1));
+        newMap[startingPos.x, startingPos.y] = 1;
         Vector2Int look;
         Queue<Vector3Int> endPoints = new Queue<Vector3Int>();
         bool isEndPoint;
@@ -49,7 +29,7 @@ public class ConnectionPoinSearch
             for (int i = 0; i < 4; i++)
             {
                 look = LookNext(node.x, node.y, i);
-                if (invertedMap[look.x, look.y] > 0)
+                if (map[look.x, look.y] > 0)
                 {
                     if (visitedMap[look.x, look.y] == 0)
                     {
@@ -72,6 +52,9 @@ public class ConnectionPoinSearch
 
         return newMap;
     }
+
+    
+
     int[,] CycleToEndPoints(int[,] travelMap, Queue<Vector3Int> endpoints)
     {
         int[,] endMap = travelMap;
@@ -164,6 +147,31 @@ public class ConnectionPoinSearch
             }
         }
         return keyPositions;
+    }
+
+    public Vector2Int LookForMiddle(int[,] map)
+    {
+        //Can find a rough middle point of a given map
+        int yMid = Mathf.RoundToInt((map.GetLength(1) - 1) / 2f);
+
+        List<int> xOpenSpaces = new List<int>();
+        List<int> yOpenSpaces = new List<int>();
+        for (int x = 0; x < map.GetLength(0); x++)
+        {
+            if (map[x, yMid] > 0)
+                xOpenSpaces.Add(x);
+        }
+        int middleXopenspaces = Mathf.RoundToInt((xOpenSpaces.Count - 1) / 2f);
+        int middleX = xOpenSpaces[middleXopenspaces];
+        for (int y = 0; y < map.GetLength(1); y++)
+        {
+            if (map[middleX, y] > 0)
+            {
+                yOpenSpaces.Add(y);
+            }
+        }
+        int middleY = yOpenSpaces[Mathf.RoundToInt((yOpenSpaces.Count - 1) / 2f)];
+        return new Vector2Int(middleX, middleY);
     }
 
     bool IsInMap(int width,int length, Vector2Int pos)

@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: ColorEvent
   m_EditorClassIdentifier: 
   eventStartIndex: 5
-  eventEndIndex: 7
   eventList:
   - eventName: 0_Wall
     eventColor: {r: 0, g: 0, b: 0, a: 1}
@@ -24,10 +23,10 @@ MonoBehaviour:
   - eventName: 3_EndPoints
     eventColor: {r: 0, g: 0.826087, b: 1, a: 1}
   - eventName: 4_Key
-    eventColor: {r: 0.3224012, g: 0.33737847, b: 0.6509434, a: 1}
-  - eventName: 5_Event2
+    eventColor: {r: 0.8800756, g: 1, b: 0, a: 1}
+  - eventName: 5_Event1
     eventColor: {r: 0.50870544, g: 0.3215686, b: 0.6509804, a: 1}
-  - eventName: 6_Event3
+  - eventName: 6_Event2
     eventColor: {r: 0.6509804, g: 0.3215686, b: 0.37504977, a: 1}
-  - eventName: 7_Event4
+  - eventName: 7_Event3
     eventColor: {r: 0.6509804, g: 0.49024072, b: 0.3215686, a: 1}
