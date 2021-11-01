@@ -29,5 +29,4 @@ static class DirArray
         Vector2Int.left + Vector2Int.down,
         Vector2Int.right + Vector2Int.down
     };
-
 }

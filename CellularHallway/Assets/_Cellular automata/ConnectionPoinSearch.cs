@@ -203,5 +203,61 @@ public class ConnectionPoinSearch
     {
         return (endPointList == null) ? null : endPointList;
     }
+
+    public List<List<Vector3Int>> DetectEventRegions(int[,] map)
+    {
+        List<List<Vector3Int>> regions = new List<List<Vector3Int>>();
+        int[,] visitedMap = new int[map.GetLength(0), map.GetLength(1)];
+
+        for (int x = 0; x < map.GetLength(0); x++)
+        {
+            for (int y = 0; y < map.GetLength(1); y++)
+            {
+                if (map[x, y] <= 1 || visitedMap[x,y] == 1) continue;
+                regionReturn re = GetRegion(x, y, map[x, y], map, visitedMap);
+                visitedMap = re.visitedMap;
+                if (re.succes == false) continue;
+                regions.Add(re.region);
+            }
+        }
+        return regions;
+    }
+    regionReturn GetRegion(int xStart, int yStart, int eventvalue, int[,] map, int[,] visitedmap)
+    {
+        List<Vector3Int> region = new List<Vector3Int>();
+        Queue<Vector2Int> regionQueue = new Queue<Vector2Int>();
+        Vector2Int tempPos;
+        region.Add(new Vector3Int(xStart, yStart, eventvalue));
+        regionQueue.Enqueue(new Vector2Int(xStart, yStart));
+        visitedmap[xStart, yStart] = 1;
+
+        while (regionQueue.Count > 0)
+        {
+            Vector2Int node = regionQueue.Dequeue();
+            for (int i = 0; i < DirArray.directions.Length; i++)
+            {
+                tempPos = node + DirArray.directions[i];
+                if (map[tempPos.x, tempPos.y] != eventvalue || visitedmap[tempPos.x, tempPos.y] != 0) continue;
+                visitedmap[tempPos.x, tempPos.y] = 1;
+                regionQueue.Enqueue(new Vector2Int(tempPos.x, tempPos.y));
+                region.Add(new Vector3Int(tempPos.x, tempPos.y, eventvalue));
+            }
+        }
+        bool succes = true;
+        if (region.Count < 10) succes = false;
+        return new regionReturn(region,visitedmap,succes);
+    }
+    struct regionReturn
+    {
+        public bool succes;
+        public List<Vector3Int> region;
+        public int[,] visitedMap;
+        public regionReturn(List<Vector3Int> _region, int[,] _visitedMap,bool _succes)
+        {
+            succes = _succes;
+            region = _region;
+            visitedMap = _visitedMap;
+        }
+    }
 }
 

@@ -28,6 +28,7 @@ public class MapPlacer2 : MonoBehaviour
     List<int[,]> maps;
     int xMax, yMax;
     int[,] totalMap;
+    int[,] cleanMap;
     int[,] mapsVisited;
     int[,] layout;
     List<int> usedRooms;
@@ -57,13 +58,28 @@ public class MapPlacer2 : MonoBehaviour
         StructureMap();
 
         totalMap = TrimMap(totalMap);
+        SetCleanMap();
 
         point = new ConnectionPoinSearch();
         int[,] pathedMap = point.findEnds(totalMap);
+        SetDetailedEvents();
         AddEndpoints();
         
 
-        FindObjectOfType<CellPlacer>().PlaceMapCells(totalMap, 0, 0);
+        FindObjectOfType<CellPlacer>().PlaceMapCells(cleanMap, 0, 0);
+    }
+
+    void SetCleanMap()
+    {
+        cleanMap = new int[totalMap.GetLength(0), totalMap.GetLength(1)];
+        for (int x = 0; x < totalMap.GetLength(0); x++)
+        {
+            for (int y = 0; y < totalMap.GetLength(1); y++)
+            {
+                if (totalMap[x, y] <= 0) continue;
+                cleanMap[x, y] = 1;
+            }
+        }
     }
 
     void GetMapGenData()
@@ -151,6 +167,7 @@ public class MapPlacer2 : MonoBehaviour
             SetNonRepeatEvents();
 
         SetEventToRoom(2); //startingRoom
+        SetEventToRoom(7); //BossRoom
     }
     void SetRepeatEvents()
     {
@@ -158,6 +175,7 @@ public class MapPlacer2 : MonoBehaviour
         for (int i = 0; i < eventLimit; i++)
         {
             int nr = rng.Next(EV.eventStartIndex, EV.eventList.Length);
+            if (nr == 7) continue;
             SetEventToRoom(nr);
         }
     }
@@ -173,6 +191,7 @@ public class MapPlacer2 : MonoBehaviour
         eventNR = eventNR.OrderBy(x => rng.Next()).ToArray();
         for (int i = 0; i < eventLimit; i++)
         {
+            if (eventNR[i] == 7) continue;
             SetEventToRoom(eventNR[i]);
         }
     }
@@ -349,12 +368,12 @@ public class MapPlacer2 : MonoBehaviour
         List<Vector2Int> ends = point.GetEndPointsPosition();
         if (ends == null) return;
         Vector2Int endPoint = ends[rng.Next(0, ends.Count)];
-        totalMap[endPoint.x,endPoint.y] = 3;
+        cleanMap[endPoint.x,endPoint.y] = 3;
 
-        List<Vector2Int> keys = point.GetKeyPositions(totalMap,endPoint,keyMinDistance);
+        List<Vector2Int> keys = point.GetKeyPositions(cleanMap,endPoint,keyMinDistance);
         if (keys.Count <= 0) return;
         Vector2Int keyPoint = keys[rng.Next(0, keys.Count)];
-        totalMap[keyPoint.x, keyPoint.y] = 4;//*/
+        cleanMap[keyPoint.x, keyPoint.y] = 4;//*/
     }
     void SetEventToRoom(int eventIndex)
     {
@@ -363,23 +382,60 @@ public class MapPlacer2 : MonoBehaviour
         int index = rng.Next(0, usedRooms.Count);
         eventRoom = usedRooms[index];
         usedRooms.Remove(usedRooms[index]);
-        switch (eventIndex)
-        {
-            case 5:
-                maps[eventRoom] = detailedEvent.SetEvent1(maps[eventRoom], eventIndex);
-                break;
-            case 6:
-                setRoomValue(eventRoom, eventIndex);
-                break;
-            case 7:
-                setRoomValue(eventRoom, eventIndex);
-                break;
-            default:
-                setRoomValue(eventRoom, eventIndex);
-                break;
-        }//*/
-        //setRoomValue(eventRoom, eventIndex);
+        setRoomValue(eventRoom, eventIndex);
+        //maps[eventRoom] = detailedEvent.SetEvent1(maps[eventRoom], eventIndex);
     }
+
+    void SetDetailedEvents()
+    {
+        List<List<Vector3Int>> eventsList = point.DetectEventRegions(totalMap);
+        if (eventsList.Count <= 0) return;
+        int[] regionValue = new int[eventsList.Count];
+        List<int[,]> eventparts = new List<int[,]>();
+        for (int i = 0; i < eventsList.Count; i++)
+        {
+            int[,] partMap = new int[totalMap.GetLength(0), totalMap.GetLength(1)];
+            for (int j = 0; j < eventsList[i].Count; j++)
+            {
+                Vector3Int pos = eventsList[i][j];
+                partMap[pos.x, pos.y] = pos.z;
+                if (j == 0) regionValue[i] = pos.z;
+            }
+            eventparts.Add(partMap);
+        }
+
+        for (int i = 0; i < eventparts.Count; i++)
+        {
+            switch (regionValue[i])
+            {
+                case 5:
+                    eventparts[i] = detailedEvent.SetEvent1(eventparts[i], 5);
+                    break;
+                case 6:
+                    eventparts[i] = detailedEvent.SetEvent2(eventparts[i], 6);
+                    break;
+                case 7:
+                    eventparts[i] = detailedEvent.SetEvent3(eventparts[i], 7);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        foreach (int[,] part in eventparts)
+        {
+            for (int x = 0; x < part.GetLength(0); x++)
+            {
+                for (int y = 0; y < part.GetLength(1); y++)
+                {
+                    if (part[x, y] <= 1) continue;
+                    cleanMap[x, y] = part[x, y];
+                }
+            }
+        }
+        
+    }
+
     void setRoomValue(int eventRoom,int eventIndex)
     {
         for (int x = 0; x < maps[eventRoom].GetLength(0); x++)
