@@ -170,7 +170,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!81 &519420029
 AudioListener:
   m_ObjectHideFlags: 0
@@ -189,7 +189,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -247,8 +247,9 @@ GameObject:
   - component: {fileID: 958518462}
   - component: {fileID: 958518461}
   - component: {fileID: 958518463}
-  - component: {fileID: 958518464}
   - component: {fileID: 958518465}
+  - component: {fileID: 958518466}
+  - component: {fileID: 958518464}
   m_Layer: 0
   m_Name: Map gen
   m_TagString: Untagged
@@ -313,18 +314,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 958518460}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3134c31b298513d43833c7cabaad8723, type: 3}
+  m_Script: {fileID: 11500000, guid: f2f0e7ec1ef993a4f8fb63e41be1061a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapGen: {fileID: 958518461}
-  xRange: 4
-  yRange: 4
-  Seed: 2,96115E+38
-  randomSeed: 0
-  maxIterations: 10
-  startIteration: 3
+  tilePrefeb: {fileID: 3634660032794842793, guid: 20bfe979d4b150747a8ef93a9c5d6683, type: 3}
 --- !u!114 &958518465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -345,4 +340,18 @@ MonoBehaviour:
   repeatableEvents: 1
   keyMinDistance: 30
   rng: {fileID: 11400000, guid: c9ec8e7d33be60c48868f6c9a2e9d12c, type: 2}
+  SetTiles: 1
   EV: {fileID: 11400000, guid: 3895fcc7eb0888441a4579ba4002b5ba, type: 2}
+--- !u!114 &958518466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 958518460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f2f0e7ec1ef993a4f8fb63e41be1061a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tilePrefeb: {fileID: 0}

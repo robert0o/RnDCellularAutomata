@@ -33,6 +33,8 @@ public class MapPlacer2 : MonoBehaviour
     int[,] layout;
     List<int> usedRooms;
 
+    public bool SetTiles;
+
     Queue<Vector2Int[]> partQueue;
     public EventValues EV;
 
@@ -64,9 +66,15 @@ public class MapPlacer2 : MonoBehaviour
         int[,] pathedMap = point.findEnds(totalMap);
         SetDetailedEvents();
         AddEndpoints();
-        
 
-        FindObjectOfType<CellPlacer>().PlaceMapCells(cleanMap, 0, 0);
+        if (SetTiles == true)
+        {
+            FindObjectOfType<SetTiles>().SetMap(cleanMap);
+        }
+        else
+        {
+            FindObjectOfType<CellPlacer>().PlaceMapCells(cleanMap, 0, 0);
+        }
     }
 
     void SetCleanMap()
