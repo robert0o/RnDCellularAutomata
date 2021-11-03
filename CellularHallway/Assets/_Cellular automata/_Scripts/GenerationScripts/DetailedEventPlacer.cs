@@ -11,6 +11,27 @@ public class DetailedEventPlacer
         rng = seed;
         point = new ConnectionPoinSearch();
     }
+    public int[,] SetStartingPosition(int[,]map, int eventValue)
+    {
+        List<Vector2Int> startingPositions = new List<Vector2Int>();
+        for (int x = 0; x < map.GetLength(0); x++)
+        {
+            for (int y = 0; y < map.GetLength(1); y++)
+            {
+                if (map[x, y] == eventValue)
+                {
+                    startingPositions.Add(new Vector2Int(x, y));
+                }
+            }
+        }
+
+        map = emptyMap(map);
+
+        Vector2Int pos = startingPositions[rng.Next(0, startingPositions.Count)];
+        map[pos.x, pos.y] = eventValue;
+
+        return map;
+    }
     public int[,] SetEvent1(int[,] map, int eventValue)
     {
         List<Vector2Int> banditCampPosition = new List<Vector2Int>();
@@ -54,7 +75,7 @@ public class DetailedEventPlacer
         for (int i = 0; i < DirArray.directions.Length; i++)
         {
             pos = location + DirArray.directions[i];
-            map[pos.x, pos.y] = eventValue;
+            map[pos.x, pos.y] = 1;
         }
         for (int i = 0; i < DirArray.diagonalDir.Length; i++)
         {
@@ -105,7 +126,6 @@ public class DetailedEventPlacer
         }
         Vector2Int pos = new Vector2Int(positions[maxFreeSpaces.x].x, positions[maxFreeSpaces.x].y);
 
-        Debug.Log(pos);
         map = emptyMap(map);
         map = SetEvent(map, pos, eventValue);
         return map;

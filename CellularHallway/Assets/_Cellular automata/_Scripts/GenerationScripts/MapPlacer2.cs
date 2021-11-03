@@ -416,6 +416,9 @@ public class MapPlacer2 : MonoBehaviour
         {
             switch (regionValue[i])
             {
+                case 2:
+                    eventparts[i] = detailedEvent.SetStartingPosition(eventparts[i], 2);
+                    break;
                 case 5:
                     eventparts[i] = detailedEvent.SetEvent1(eventparts[i], 5);
                     break;

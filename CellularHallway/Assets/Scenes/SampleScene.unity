@@ -164,6 +164,7 @@ GameObject:
   - component: {fileID: 519420032}
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
+  - component: {fileID: 519420030}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -179,6 +180,19 @@ AudioListener:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 519420028}
   m_Enabled: 1
+--- !u!114 &519420030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 364249d0f810e4b4784a99cfa775bf9b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
 --- !u!20 &519420031
 Camera:
   m_ObjectHideFlags: 0
@@ -248,7 +262,6 @@ GameObject:
   - component: {fileID: 958518461}
   - component: {fileID: 958518463}
   - component: {fileID: 958518465}
-  - component: {fileID: 958518466}
   - component: {fileID: 958518464}
   m_Layer: 0
   m_Name: Map gen
@@ -320,6 +333,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tilePrefeb: {fileID: 3634660032794842793, guid: 20bfe979d4b150747a8ef93a9c5d6683, type: 3}
+  stairs: {fileID: 3287950842315917431, guid: 4f50322955527dc4fa71185b6add948d, type: 3}
+  key: {fileID: 6979903359909720574, guid: 72bfb338299f33d45aa33f544fae5460, type: 3}
+  bandit: {fileID: 6944614716353567840, guid: 76af018f16a00514f84758033d7a8ce8, type: 3}
+  tresureMap: {fileID: 1093431987051859707, guid: 5c1decdd87679af4dbea7db57edc17a9, type: 3}
+  chest: {fileID: 8827608884228956108, guid: 2ff6d1d7f58b8f742bace692d720869f, type: 3}
+  boss: {fileID: 8555281279240819912, guid: b47ef5834e3e2174da9eb91f05103248, type: 3}
+  player: {fileID: 2709478193461124055, guid: 13fc359003e4e3d43a6d5492cf2afee7, type: 3}
 --- !u!114 &958518465
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -342,16 +362,3 @@ MonoBehaviour:
   rng: {fileID: 11400000, guid: c9ec8e7d33be60c48868f6c9a2e9d12c, type: 2}
   SetTiles: 1
   EV: {fileID: 11400000, guid: 3895fcc7eb0888441a4579ba4002b5ba, type: 2}
---- !u!114 &958518466
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 958518460}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2f0e7ec1ef993a4f8fb63e41be1061a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  tilePrefeb: {fileID: 0}
