@@ -23,11 +23,6 @@ public class MapGenerator : MonoBehaviour
     public int[] rules = new int[9];
     List<int[,]> hallways;
 
-    private void Update()
-    {
-        //List<int[,]> mappy = GetMaps(seed, iterations);
-    }
-
     public List<int[,]> GetMaps(string _seed, int _iterations)
     {
         seed = _seed;
@@ -40,7 +35,7 @@ public class MapGenerator : MonoBehaviour
         for (int i = 0; i < hallways.Count; i++)
         {
             hallways[i] = InvertMap(hallways[i]);
-            //hallways[i] = point.findEnds(hallways[i]);
+            hallways[i] = point.findEnds(hallways[i]);
             maps.Add(hallways[i]);
         }
         /*CellPlacer cells = FindObjectOfType<CellPlacer>();
