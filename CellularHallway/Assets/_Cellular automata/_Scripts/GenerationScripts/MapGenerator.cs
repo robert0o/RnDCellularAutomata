@@ -23,6 +23,11 @@ public class MapGenerator : MonoBehaviour
     public int[] rules = new int[9];
     List<int[,]> hallways;
 
+    private void Update()
+    {
+        //List<int[,]> mappy = GetMaps(seed, iterations);
+    }
+
     public List<int[,]> GetMaps(string _seed, int _iterations)
     {
         seed = _seed;
@@ -213,9 +218,9 @@ public class MapGenerator : MonoBehaviour
         int TileState = map[startX, startY];
         
         VisitedTiles[startX, startY] = 1;
-        
+        int extra = 0;
         Tile tile;
-        while (SectionQueue.Count > 0)
+        while (SectionQueue.Count > 0 && extra <1000)
         {
             tile = SectionQueue.Dequeue();
             section.Add(tile);
@@ -239,6 +244,7 @@ public class MapGenerator : MonoBehaviour
                 VisitedTiles[tile.xPos, tile.yPos + 1] = 1;
                 SectionQueue.Enqueue(new Tile(tile.xPos, tile.yPos + 1));
             }
+            extra++;
         }
             return section;
     }
@@ -308,7 +314,7 @@ public class MapGenerator : MonoBehaviour
         return newMap;
     }
 
-   /* private void OnDrawGizmos()
+    /*private void OnDrawGizmos()
     {
         if (map == null) return;
         for (int x = 0; x < width; x++)
