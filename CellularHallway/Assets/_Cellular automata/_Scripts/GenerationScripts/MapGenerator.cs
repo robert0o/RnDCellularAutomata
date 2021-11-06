@@ -218,33 +218,20 @@ public class MapGenerator : MonoBehaviour
         int TileState = map[startX, startY];
         
         VisitedTiles[startX, startY] = 1;
-        int extra = 0;
         Tile tile;
-        while (SectionQueue.Count > 0 && extra <1000)
+        while (SectionQueue.Count > 0)
         {
             tile = SectionQueue.Dequeue();
             section.Add(tile);
-            if (IsInsideMap(tile.xPos - 1, tile.yPos) && map[tile.xPos - 1, tile.yPos] == TileState && VisitedTiles[tile.xPos - 1, tile.yPos] == 0)
+            for (int i = 0; i < DirArray.directions.Length; i++)
             {
-                VisitedTiles[tile.xPos - 1, tile.yPos] = 1;
-                SectionQueue.Enqueue(new Tile(tile.xPos - 1, tile.yPos));
+                Vector2Int dir = new Vector2Int(tile.xPos,tile.yPos) + DirArray.directions[i];
+                if (IsInsideMap(dir.x,dir.y) && map[dir.x, dir.y] == TileState && VisitedTiles[dir.x, dir.y] == 0)
+                {
+                    VisitedTiles[dir.x, dir.y] = 1;
+                    SectionQueue.Enqueue(new Tile(dir.x, dir.y));
+                }
             }
-            if (IsInsideMap(tile.xPos + 1, tile.yPos) && map[tile.xPos + 1, tile.yPos] == TileState && VisitedTiles[tile.xPos + 1, tile.yPos] == 0)
-            {
-                VisitedTiles[tile.xPos + 1, tile.yPos] = 1;
-                SectionQueue.Enqueue(new Tile(tile.xPos + 1, tile.yPos));
-            }
-            if (IsInsideMap(tile.xPos, tile.yPos - 1) && map[tile.xPos, tile.yPos - 1] == TileState && VisitedTiles[tile.xPos, tile.yPos - 1] == 0)
-            {
-                VisitedTiles[tile.xPos, tile.yPos - 1] = 1;
-                SectionQueue.Enqueue(new Tile(tile.xPos, tile.yPos - 1));
-            }
-            if (IsInsideMap(tile.xPos, tile.yPos + 1) && map[tile.xPos, tile.yPos + 1] == TileState && VisitedTiles[tile.xPos, tile.yPos + 1] == 0)
-            {
-                VisitedTiles[tile.xPos, tile.yPos + 1] = 1;
-                SectionQueue.Enqueue(new Tile(tile.xPos, tile.yPos + 1));
-            }
-            extra++;
         }
             return section;
     }
