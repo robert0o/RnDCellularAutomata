@@ -9,7 +9,9 @@ public class CamScript : MonoBehaviour
     {
         if (player != null)
         {
-            transform.position = Vector2.MoveTowards(transform.position, player.transform.position, 1);
+            Vector3 target = player.transform.position;
+            target.z = transform.position.z;
+            transform.position = Vector3.MoveTowards(transform.position, target, 1);
         }
     }
 }

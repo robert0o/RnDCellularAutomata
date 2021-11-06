@@ -111,6 +111,10 @@ public class SetTiles : MonoBehaviour
                     tileList.Add(new Vector3Int(x, y, 0));
                     IsWallAfterFloor = true;
                 }
+                if (map[x, y] == 1)
+                {
+                    IsWallAfterFloor = true;
+                }
                 if (map[x, y] <= 0)
                 {
                     if (IsWallAfterFloor == true)
