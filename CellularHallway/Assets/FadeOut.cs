@@ -1,29 +1,61 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class FadeOut : MonoBehaviour
 {
     public SpriteRenderer rend;
     public float fadingTime;
-    public bool isFading;
+    public bool isFading, fadeIn;
     float alpha;
+    AsyncOperation a;
     void Start()
     {
-        alpha = 0;
         Color col = rend.color;
-        col.a = alpha;
+        col.a = 1.2f;
         rend.color = col;
-        isFading = false;
+        SwitchFade(true);
     }
     private void Update()
     {
-        if(isFading == true)
+        Color col = rend.color;
+        if (isFading == true)
         {
-            alpha += fadingTime*Time.deltaTime/20;
-            Color col = rend.color;
-            col.a = alpha;
+            col.a += 1 / fadingTime * Time.deltaTime;
+            if(col.a >= 1)
+            {
+                col.a = 1;
+                isFading = false;
+                a.allowSceneActivation = true;
+            }
             rend.color = col;
+        }
+        if (fadeIn == true)
+        {
+            col.a -= 1 / fadingTime * Time.deltaTime;
+            if(col.a <= 0)
+            {
+                col.a = 0;
+                fadeIn = false;
+            }
+            rend.color = col;
+        }
+        
+    }
+    public void SwitchFade(bool fadeingIn)
+    {
+        if(fadeingIn == true)
+        {
+            isFading = false;
+            fadeIn = true;
+        }
+        else
+        {
+            isFading = true;
+            fadeIn = false;
+            a = SceneManager.LoadSceneAsync(0);
+            a.allowSceneActivation = false;
         }
     }
 

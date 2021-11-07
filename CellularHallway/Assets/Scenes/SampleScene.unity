@@ -198,8 +198,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rend: {fileID: 488660214}
-  fadingTime: 10
+  fadingTime: 2
   isFading: 0
+  fadeIn: 0
 --- !u!212 &488660214
 SpriteRenderer:
   m_ObjectHideFlags: 0

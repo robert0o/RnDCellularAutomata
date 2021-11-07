@@ -12,6 +12,7 @@ public class PlayerControls : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         FindObjectOfType<CamScript>().player = this.gameObject;
+        FindObjectOfType<CamScript>().setCam();
     }
 
     // Update is called once per frame

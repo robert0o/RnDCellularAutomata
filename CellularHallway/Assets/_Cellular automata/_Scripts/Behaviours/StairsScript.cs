@@ -20,7 +20,7 @@ public class StairsScript : MonoBehaviour
         if (keyPickedUp == true)
         {
             rend.sprite = stairs;
-            FindObjectOfType<FadeOut>().isFading = true;
+            FindObjectOfType<FadeOut>().SwitchFade(false);
         }
     }
 }
