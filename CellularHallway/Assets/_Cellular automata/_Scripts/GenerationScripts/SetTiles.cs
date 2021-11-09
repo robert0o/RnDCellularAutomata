@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class SetTiles : MonoBehaviour
 {
+    //Not very clean but it works
     public GameObject tilePrefeb;
     public GameObject stairs;
     public GameObject key;
@@ -16,35 +17,40 @@ public class SetTiles : MonoBehaviour
     bool hasBoss = false;
     Vector2Int bossPos;
 
+    //Calling this will instantiate all tiles
     public void SetMap(int[,] map)
     {
+        //first is getting all floor and wall tiles then instantiate them
         List<Vector3Int> tileList = getTiles(map);
         for (int i = 0; i < tileList.Count; i++)
         {
-            CreateObjects(tileList[i]);
+            CreateFloornWalls(tileList[i]);
         }
+        //same with things like the player, chests, ect.
         List<Vector3Int> EntityList = getEntities(map);
         for (int i = 0; i < EntityList.Count; i++)
         {
-            EntityCheck(EntityList[i]);
+            CreateEntities(EntityList[i]);
         }
+        //in case bosstiles got placed. is always 5*5 so -2 of the middle
         if(hasBoss == true)
         {
             bossPos = new Vector2Int(bossPos.x - 2, bossPos.y - 2);
             Instantiate(boss).transform.position = new Vector3(bossPos.x, bossPos.y + .5f, bossPos.y - .5f);
         }
     }
-
-    void CreateObjects(Vector3Int tile)
+    //instantiates the floor and walls
+    void CreateFloornWalls(Vector3Int tile)
     {
         TileScript tileScript;
         tileScript = Instantiate(tilePrefeb).GetComponent<TileScript>();
-        float depth = (tile.z == 0||tile.z ==1) ? 100 : -.7f;
+        float depth = (tile.z == 0||tile.z ==1) ? 100 : -.7f; //floor tiles are set far beck so they won't render in front of anything
         Vector3 pos = new Vector3(tile.x, tile.y, tile.y + depth) ;
         tileScript.SetSprite(tile.z);
         tileScript.transform.position = pos;
     }
-    void EntityCheck(Vector3Int tile)
+    //instantiates the other things
+    void CreateEntities(Vector3Int tile)
     {
         if (tile.z == 2)
         {
@@ -63,7 +69,7 @@ public class SetTiles : MonoBehaviour
         }
         if (tile.z == 5)
         {
-            //bandit
+            //bandit, these are plact in a '+' pattarn
             Instantiate(tresureMap).transform.position = new Vector3(tile.x, tile.y, tile.y - .5f);
             for (int i = 0; i < DirArray.directions.Length; i++)
             {
@@ -83,6 +89,8 @@ public class SetTiles : MonoBehaviour
             bossPos = new Vector2Int(tile.x, tile.y);
         }
     }
+
+    //makes a list of everything that is not a wall or empty tile
     List<Vector3Int> getEntities(int[,] map)
     {
         List<Vector3Int> entityList = new List<Vector3Int>();
@@ -98,32 +106,39 @@ public class SetTiles : MonoBehaviour
         }
         return entityList;
     }
+    //makes a list of floor and wall tiles to place later the .z is for what sprite to use
+    //0 = normal floor tile, 1 = boss floor tile, 2 = black wall sprite and 3 = brick wall sprite
     List<Vector3Int> getTiles(int[,] map)
     {
         List<Vector3Int> tileList = new List<Vector3Int>();
-        bool IsWallAfterFloor = false;
+        bool IsWallAfterFloor = false;                                              //To know what sprite to use
         for (int x = 0; x < map.GetLength(0); x++)
         {
             for (int y = 0; y < map.GetLength(1); y++)
             {
+                //Tiles that are empty or simply have an entitiy on top of it.
                 if (map[x, y] == 1 || map[x, y] == 2 || map[x, y] == 4 || map[x, y] == 5 || map[x, y] == 6)
                 {
                     tileList.Add(new Vector3Int(x, y, 0));
                     IsWallAfterFloor = true;
                 }
+                //for the stairs doesn't need a floor tile
                 if (map[x, y] == 3)
                 {
                     IsWallAfterFloor = true;
                 }
                 if (map[x, y] <= 0)
                 {
+                    //if the tile in front of the wall is a floor tile it will use the brick wall as sprite.
                     if (IsWallAfterFloor == true)
                     {
                         tileList.Add(new Vector3Int(x, y, 3));
                         IsWallAfterFloor = false;
                     }
+                    //else it will use the black wall sprite
                     else
                     {
+                        //Looping to see if there is a floor tile above or next to it. else it won't be added as it's not needed
                         for (int i = 0; i < DirArray.directions.Length; i++)
                         {
                             Vector2Int pos = new Vector2Int(x, y) + DirArray.directions[i];
@@ -136,6 +151,7 @@ public class SetTiles : MonoBehaviour
                         }
                     }
                 }
+                //tiles for the boss area
                 if (map[x, y] == 7)
                 {
                     tileList.Add(new Vector3Int(x, y, 1));

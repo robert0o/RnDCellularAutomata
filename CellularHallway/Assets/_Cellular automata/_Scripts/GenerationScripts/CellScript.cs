@@ -8,6 +8,7 @@ public class CellScript : MonoBehaviour
     public EventValues EV;
     public SpriteRenderer sprite;
 
+    //for testing purposes sets the color of the cell to the color of the event
     public void InitCell(int cellType, Vector3 pos)
     {
         if (cellType > EV.eventList.Length - 1) return;

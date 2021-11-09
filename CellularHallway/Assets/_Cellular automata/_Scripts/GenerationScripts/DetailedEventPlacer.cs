@@ -13,6 +13,7 @@ public class DetailedEventPlacer
     }
     public int[,] SetStartingPosition(int[,]map, int eventValue)
     {
+        //chooses a single position to start form
         List<Vector2Int> startingPositions = new List<Vector2Int>();
         for (int x = 0; x < map.GetLength(0); x++)
         {
@@ -34,6 +35,7 @@ public class DetailedEventPlacer
     }
     public int[,] SetEvent1(int[,] map, int eventValue)
     {
+        //loosk for a place with a 3*3 area
         List<Vector2Int> banditCampPosition = new List<Vector2Int>();
         bool possiblePosition;
         Vector2Int location;
@@ -68,7 +70,7 @@ public class DetailedEventPlacer
             int campNr = Mathf.FloorToInt(banditCampPosition.Count * 0.5f);
             location = banditCampPosition[campNr];
         }
-
+        //sets the surrounding area to a empy tile and the center to the event tile. tile placer script does the rest
         map = emptyMap(map);
         Vector2Int pos;
         map[location.x, location.y] = eventValue;
@@ -84,9 +86,9 @@ public class DetailedEventPlacer
         }
         return map;
     }
+    //tressure
     public int[,] SetEvent2(int[,] map, int eventValue)
     {
-        //tressure
         List<Vector2Int> counting = new List<Vector2Int>();
         for (int x = 0; x < map.GetLength(0); x++)
         {
@@ -96,17 +98,18 @@ public class DetailedEventPlacer
                 counting.Add(new Vector2Int(x, y));
             }
         }
-
+        //finds and endpoitn of the area to put a chest
         List<Vector2Int> points = point.GetKeyPositions(map, counting[counting.Count / 2], int.MaxValue);
 
         map = emptyMap(map);
         map[points[0].x, points[0].y] = eventValue;
         return map;
     }
+    //boss Room
     public int[,] SetEvent3(int[,] map, int eventValue)
     {
         List<Vector3Int> positions = new List<Vector3Int>();
-        
+        //gets the area for a boss room
         for (int x = 0; x < map.GetLength(0); x++)
         {
             for (int y = 0; y < map.GetLength(1); y++)
@@ -116,6 +119,7 @@ public class DetailedEventPlacer
             }
         }
         
+        //goes trough all and selects saves the one with the most free spaces
         Vector2Int maxFreeSpaces = Vector2Int.zero;
         for (int i = 0; i < positions.Count; i++)
         {
@@ -124,6 +128,7 @@ public class DetailedEventPlacer
                 maxFreeSpaces = new Vector2Int(i, positions[i].z);
             }
         }
+        //finnaly select the place the boss will be
         Vector2Int pos = new Vector2Int(positions[maxFreeSpaces.x].x, positions[maxFreeSpaces.x].y);
 
         map = emptyMap(map);
@@ -131,12 +136,9 @@ public class DetailedEventPlacer
         return map;
     }
 
+    //looks around and counts the amount of free spaces for the boss room 
     Vector3Int CountingFreeSpaces(int[,] map, Vector2Int startPos,int eventValue)
     {
-        if (startPos.x == 16 && startPos.y == 16)
-        {
-
-        }
         Vector3Int pos = new Vector3Int(startPos.x, startPos.y, 0);
         for (int x = startPos.x -2; x < startPos.x + 2; x++)
         {
@@ -154,18 +156,7 @@ public class DetailedEventPlacer
         return pos;
     }
 
-    bool HasFreeSpaceAndWalls(int[,] map, Vector2Int startPos, int eventValue)
-    {
-        for (int x = startPos.x - 2; x <= startPos.x + 2; x++)
-        {
-            for (int y = startPos.y - 2; y <= startPos.x + 2; y++)
-            {
-                if (map[x, y] != eventValue) return false;
-            }
-        }
-        return true;
-    }
-
+    //set the boss tiles
     int[,] SetEvent(int[,] map, Vector2Int startPos, int eventValue)
     {
         for (int x = startPos.x - 2; x <= startPos.x + 2; x++)
@@ -178,6 +169,7 @@ public class DetailedEventPlacer
         return map;
     }
 
+    //clean the map to make values back to 1
     int[,] emptyMap(int[,] map)
     {
         for (int x = 0; x < map.GetLength(0); x++)

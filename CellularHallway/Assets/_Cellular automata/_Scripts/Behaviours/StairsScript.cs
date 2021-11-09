@@ -17,9 +17,11 @@ public class StairsScript : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //change to stairs prite when the key got picked up
         if (keyPickedUp == true)
         {
             rend.sprite = stairs;
+            //start the fading to black and loading of the scene
             FindObjectOfType<FadeOut>().SwitchFade(false);
         }
     }

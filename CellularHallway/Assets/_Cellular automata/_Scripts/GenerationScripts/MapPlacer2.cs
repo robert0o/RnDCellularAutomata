@@ -38,6 +38,7 @@ public class MapPlacer2 : MonoBehaviour
     Queue<Vector2Int[]> partQueue;
     public EventValues EV;
 
+    //something to hold the min and max values of a int[,]
     struct MinMax
     {
         public Vector2Int Max;
@@ -49,17 +50,23 @@ public class MapPlacer2 : MonoBehaviour
         }
 
     }
+
     public void Start()
     {
+        //generate a random seed. this should always be true when building
         if (randomSeed == true) Seed = Random.Range(float.MinValue, float.MaxValue).ToString();
         rng.setSeed(Seed.GetHashCode());
         detailedEvent = new DetailedEventPlacer(rng);
 
+        //get's parts from mapgenerator 
         GetMapGenData();
 
+        //set a layout structure for map placement
         StructureMap();
 
+        //remove uneccesary size of the map
         totalMap = TrimMap(totalMap);
+        
         SetCleanMap();
 
         point = new ConnectionPoinSearch();
@@ -67,6 +74,7 @@ public class MapPlacer2 : MonoBehaviour
         SetDetailedEvents();
         AddEndpoints();
 
+        //for testing purpoces cells can still be placed instead of tiles
         if (SetTiles == true)
         {
             FindObjectOfType<SetTiles>().SetMap(cleanMap);
@@ -77,6 +85,7 @@ public class MapPlacer2 : MonoBehaviour
         }
     }
 
+    //makes a compy of the total map without events placed
     void SetCleanMap()
     {
         cleanMap = new int[totalMap.GetLength(0), totalMap.GetLength(1)];
@@ -90,6 +99,7 @@ public class MapPlacer2 : MonoBehaviour
         }
     }
 
+    //get's parts from map generator
     void GetMapGenData()
     {
         maps = new List<int[,]>();
@@ -99,11 +109,16 @@ public class MapPlacer2 : MonoBehaviour
         mapGen = FindObjectOfType<MapGenerator>();
         int iterate = 3;
         
+        //when iteration go to far there won't be any more parts so and invinite loop would happen
         while (maps.Count <= totalSections)
         {
             if(iterate >= 10){
+                //making a new seed when the loop has gone to long and still hasn't gotten enough parts 
                 Seed = "";
                 for (int i = 0; i < 10; i++){
+                    //using chars for a uniqe seed
+                    //Fun fact I calculated this and if every person on earth did this every second for a year they would still take 
+                    //a million+ years and not even get a duplicate seed once. or they're REALLY lucky
                     char ch = (char)rng.Next(0, 255);
                     Seed += ch.ToString();
                     iterate = 3;
@@ -112,6 +127,7 @@ public class MapPlacer2 : MonoBehaviour
             List<int[,]> _maps = mapGen.GetMaps(Seed, iterate);
             for (int j = 0; j < _maps.Count; j++)
             {
+                //check what is the maximum size of all parts for later use 
                 if (_maps[j].GetLength(0) > xMax) xMax = _maps[j].GetLength(0);
                 if (_maps[j].GetLength(1) > yMax) yMax = _maps[j].GetLength(1);
                 maps.Add(_maps[j]);
@@ -120,9 +136,12 @@ public class MapPlacer2 : MonoBehaviour
         }
     }
 
+    //structures the map to make it easier to place the parts
     void StructureMap()
     {
+        //making a new map with some leway to prevent index out of range errors
         totalMap = new int[xMax * (xRange + 1), yMax * (yRange + 1)];
+        //getting roughly the middle of the map
         Vector2Int baseOffset = new Vector2Int(
             Mathf.CeilToInt(totalMap.GetLength(0) * .5f - maps[0].GetLength(0) * .5f),
             Mathf.CeilToInt(totalMap.GetLength(1) * .5f - maps[0].GetLength(0) * .5f));
@@ -135,13 +154,17 @@ public class MapPlacer2 : MonoBehaviour
 
         partQueue = new Queue<Vector2Int[]>();
 
+        //randomly set the starting point
         int midX = rng.Next(0,xRange-1), midY = Mathf.CeilToInt(rng.Next(0, yRange - 1));
         Vector2Int layoutPosition = new Vector2Int(midX, midY);
         mapsVisited[layoutPosition.x, layoutPosition.y] = 1;
 
+        //set the first part to the map
         int firstPart = layout[layoutPosition.x, layoutPosition.y];
         SetPartToMap(maps[firstPart],baseOffset);
         Vector2Int[] qVector = { layoutPosition, baseOffset };
+
+        //part of the loop to set the other parts
         partQueue.Enqueue(qVector);
         while (partQueue.Count > 0)
         {
@@ -150,6 +173,7 @@ public class MapPlacer2 : MonoBehaviour
         }
     }
 
+    //distributes the parts randomly 
     void CreateLayout()
     {
         layout = new int[xRange, yRange];
@@ -166,6 +190,7 @@ public class MapPlacer2 : MonoBehaviour
             }
         }
     }
+    //set's event that are more efficient to place them here
     void SetEventsInMap()
     {
         getUsedRooms();
@@ -177,16 +202,18 @@ public class MapPlacer2 : MonoBehaviour
         SetEventToRoom(2); //startingRoom
         SetEventToRoom(7); //BossRoom
     }
+    //when multiple event's can be placed
     void SetRepeatEvents()
     {
         int eventLimit = (maxEvents < usedRooms.Count -1) ? maxEvents : usedRooms.Count - 1;
         for (int i = 0; i < eventLimit; i++)
         {
             int nr = rng.Next(EV.eventStartIndex, EV.eventList.Length);
-            if (nr == 7) continue;
+            if (nr == 7) continue; //Qick sollution for the boss room as I later placed it to always have 1
             SetEventToRoom(nr);
         }
     }
+    //when single event's can be placed
     void SetNonRepeatEvents()
     {
         int[] eventNR = new int[EV.eventList.Length - EV.eventStartIndex];
@@ -199,11 +226,12 @@ public class MapPlacer2 : MonoBehaviour
         eventNR = eventNR.OrderBy(x => rng.Next()).ToArray();
         for (int i = 0; i < eventLimit; i++)
         {
-            if (eventNR[i] == 7) continue;
+            if (eventNR[i] == 7) continue; //same as in repeatEvents
             SetEventToRoom(eventNR[i]);
         }
     }
 
+    //goes through the layout to see what parts are used
     void getUsedRooms()
     {
         usedRooms = new List<int>();
@@ -216,44 +244,39 @@ public class MapPlacer2 : MonoBehaviour
         }
     }
 
+    //setting the parts form the layout into the map
     void PlaceStructuredMap(Vector2Int position,Vector2Int offset)
     {
         int currentPart = layout[position.x, position.y];
-        Vector2Int[] directions = { Vector2Int.left, Vector2Int.right, Vector2Int.up, Vector2Int.down };
-        int[] index = { 0, 1, 2, 3 };
-        //System.Array.Sort(directions,);
+        Vector2Int[] directions = { Vector2Int.left, Vector2Int.right, Vector2Int.up, Vector2Int.down }; //should be form dirArray
+        //suffeling the direction to look at first, making it a little more random
         directions = directions.OrderBy(x => rng.Next()).ToArray();
 
-        //somehow messes stuff up
-        List<int> dirs = new List<int>();
-        for (int i = 0; i < directions.Length; i++){
-            dirs.Add(i);}
-        int[] rngDir = new int[dirs.Count];
-        for (int i = 0; i < rngDir.Length; i++){
-            int j = rng.Next(0, dirs.Count);
-            rngDir[i] = j;
-            dirs.Remove(dirs[j]);
-        }
-
-
+        //looping rough the direction to look at
         for (int i = 0; i < 4; i++)
         {
+            //for ease of use making new vectors with valus that need to be used
             Vector2Int newPos = position + directions[i];
             Vector2Int newOffset = offset;
 
+            //some checks to prefent errors
             if (newPos.x >= layout.GetLength(0) || newPos.x < 0 || newPos.y >= layout.GetLength(1) || newPos.y < 0) continue;
             if (mapsVisited[newPos.x, newPos.y] == 1) continue;
 
+            //getting the part for the layout, chekking for overlap and setting it used so it won't be used again
             int nextPart = layout[newPos.x, newPos.y];
             newOffset = newOffset + GetOverlapOffset(maps[currentPart], maps[nextPart], directions[i]);
             mapsVisited[newPos.x, newPos.y] = 1;
 
             SetPartToMap(maps[nextPart], newOffset);
+
+            //add to the queue so other part will be set
             Vector2Int[] qVector = { newPos, newOffset };
             partQueue.Enqueue(qVector);
         }
     }
 
+    //add the part to the total map
     void SetPartToMap(int[,] part, Vector2Int offset)
     {
         for (int x = 0; x < part.GetLength(0); x++){
@@ -263,11 +286,14 @@ public class MapPlacer2 : MonoBehaviour
             }
         }
     }
-    
+
+    //getting the offset for the parts to not overlap. doesn't check for overlap with already placed parts
+    //make a temporary map, placing bolth parts at roughly there center ontop of eachoter then move them away untill they don't overlap
     Vector2Int GetOverlapOffset(int[,] baseMap, int[,] overlappingMap, Vector2Int dir)
     {
         int[,] tempmap = new int[xMax * 3, yMax * 3];
         Vector2Int offset = new Vector2Int(xMax, yMax);
+        //setting part one to roughly the middle of the map
         for (int x = 0; x < baseMap.GetLength(0); x++)
         {
             for (int y = 0; y < baseMap.GetLength(1); y++)
@@ -276,6 +302,7 @@ public class MapPlacer2 : MonoBehaviour
                     tempmap[x + offset.x, y + offset.y] = baseMap[x, y];
             }
         }
+        //making a list of empty tiles to make it easier to check if they overlap
         List<Vector3Int> OverlapList = new List<Vector3Int>();
         for (int x = 0; x < overlappingMap.GetLength(0); x++)
         {
@@ -286,6 +313,7 @@ public class MapPlacer2 : MonoBehaviour
             }
         }
 
+        //calculating htere middel
         int xMid1 = Mathf.CeilToInt(baseMap.GetLength(0) * .5f);
         int yMid1 = Mathf.CeilToInt(baseMap.GetLength(1) * .5f);
         int xMid2 = Mathf.CeilToInt(overlappingMap.GetLength(0) * .5f);
@@ -295,6 +323,7 @@ public class MapPlacer2 : MonoBehaviour
         bool isOverlapping = true;
         
         Vector2Int overlapPos;
+        //while loop to keep going untill they don't overlap anymore
         while (isOverlapping == true)
         {
             isOverlapping = false;
@@ -306,21 +335,22 @@ public class MapPlacer2 : MonoBehaviour
                     isOverlapping = true;
                 }
             }
-            offset.x += dir.x;
-            offset.y += dir.y;
+            offset.x += dir.x; // dir is the direction for it to go at. taking bolth x and y togeter, 
+            offset.y += dir.y; //so there won't have to be one for horzintal and one for vertical
         }
+        //from testing going back 1 makes it till it connects and going back 2 connects it on multiple places
         offset.x -= dir.x*2;
-        offset.y -= dir.y*2;//*/
+        offset.y -= dir.y*2;
+        // calculating the offset and returning it
         for (int i = 0; i < OverlapList.Count; i++)
         {
             tempmap[OverlapList[i].x + offset.x, OverlapList[i].y+ offset.y] = OverlapList[i].z;
         }
         offset.x -= xMax;
         offset.y -= yMax;
-        //FindObjectOfType<CellPlacer>().PlaceMapCells(tempmap, 0, 0);
         return offset;
     }
-
+    //removing uneccecary data from the map
     int[,] TrimMap(int[,] map)
     {
         MinMax mm = GetMinMax(map);
@@ -337,6 +367,7 @@ public class MapPlacer2 : MonoBehaviour
         }
         return trimmedMap;
     }
+    //function to get min max not used as much as i chould
     MinMax GetMinMax(int[,] map)
     {
         int xMin = int.MaxValue, yMin = int.MaxValue;
@@ -356,33 +387,23 @@ public class MapPlacer2 : MonoBehaviour
         }
         return new MinMax(xMin, yMin, xMax, yMax);
     }
-
-    MinMax GetMinMax(List<int[,]> maps)
-    {
-        int xMin = int.MaxValue, xMax = int.MinValue, yMin = int.MaxValue, yMax = int.MinValue;
-        for (int i = 0; i < maps.Count; i++)
-        {
-            MinMax mm = GetMinMax(maps[i]);
-            if (mm.Max.x > xMax) xMax = mm.Max.x;
-            if (mm.Min.x < xMin) xMin = mm.Min.x;
-            if (mm.Max.y > yMax) yMax = mm.Max.y;
-            if (mm.Min.y < yMin) yMin = mm.Min.y;
-        }
-        return new MinMax(xMin, yMin, xMax, yMax);
-    }
+    //add and exit and keys
     void AddEndpoints()
     {
+        //looks for end points and randomly selects one
         if (point == null) return;
         List<Vector2Int> ends = point.GetEndPointsPosition();
         if (ends == null) return;
         Vector2Int endPoint = ends[rng.Next(0, ends.Count)];
         cleanMap[endPoint.x,endPoint.y] = 3;
 
+        //then looks for a location to place the keys
         List<Vector2Int> keys = point.GetKeyPositions(cleanMap,endPoint,keyMinDistance);
         if (keys.Count <= 0) return;
         Vector2Int keyPoint = keys[rng.Next(0, keys.Count)];
-        cleanMap[keyPoint.x, keyPoint.y] = 4;//*/
+        cleanMap[keyPoint.x, keyPoint.y] = 4;
     }
+    //takes a random room and then changes the empty spaces to the event's value
     void SetEventToRoom(int eventIndex)
     {
         int eventRoom;
@@ -391,11 +412,12 @@ public class MapPlacer2 : MonoBehaviour
         eventRoom = usedRooms[index];
         usedRooms.Remove(usedRooms[index]);
         setRoomValue(eventRoom, eventIndex);
-        //maps[eventRoom] = detailedEvent.SetEvent1(maps[eventRoom], eventIndex);
     }
 
+    //sets the detailed events
     void SetDetailedEvents()
     {
+        //get the regions for events then makes them a clean map and later set it to a detailed event
         List<List<Vector3Int>> eventsList = point.DetectEventRegions(totalMap);
         if (eventsList.Count <= 0) return;
         int[] regionValue = new int[eventsList.Count];
@@ -412,6 +434,7 @@ public class MapPlacer2 : MonoBehaviour
             eventparts.Add(partMap);
         }
 
+        //calling the right function for every event
         for (int i = 0; i < eventparts.Count; i++)
         {
             switch (regionValue[i])
@@ -433,6 +456,7 @@ public class MapPlacer2 : MonoBehaviour
             }
         }
 
+        //place parts to  clean map
         foreach (int[,] part in eventparts)
         {
             for (int x = 0; x < part.GetLength(0); x++)
@@ -447,6 +471,7 @@ public class MapPlacer2 : MonoBehaviour
         
     }
 
+    //set's a part to the value of a event
     void setRoomValue(int eventRoom,int eventIndex)
     {
         for (int x = 0; x < maps[eventRoom].GetLength(0); x++)

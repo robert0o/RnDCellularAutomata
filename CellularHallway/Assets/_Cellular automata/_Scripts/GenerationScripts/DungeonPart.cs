@@ -2,7 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DungeonPart {
+/* This code is not used anymore.
+ * it was used to catagorize parts of the dungeon but i'm not using that anymore
+ */
+public class DungeonPart { 
     public int[,] tileMap;
     public List<cPoint> cPoints;
     public Vector2Int startPoint;

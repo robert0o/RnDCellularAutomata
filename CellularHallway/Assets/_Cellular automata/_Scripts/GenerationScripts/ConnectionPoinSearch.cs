@@ -13,12 +13,15 @@ public class ConnectionPoinSearch
         int[,] visitedMap = new int[map.GetLength(0), map.GetLength(1)];
         Queue<Vector3Int> PointsToLookAt = new Queue<Vector3Int>();
         endPointList = new List<Vector2Int>();
-        //
+        //taking roughly the middle of the map and setting it as a staring point
         Vector2Int startingPos = LookForMiddle(map);
-        //
+
+        //making a queue to loop torugh the map
         PointsToLookAt.Enqueue(new Vector3Int(startingPos.x, startingPos.y, 1));
+        //set the starting position of the map to a distance value of 1
         newMap[startingPos.x, startingPos.y] = 1;
         Vector2Int look;
+        //the queue to loop add trough once a tile doesn't add anything new to the firs queue
         Queue<Vector3Int> endPoints = new Queue<Vector3Int>();
         bool isEndPoint;
         while (PointsToLookAt.Count > 0)
@@ -28,40 +31,46 @@ public class ConnectionPoinSearch
             visitedMap[node.x, node.y] = 1;
             for (int i = 0; i < 4; i++)
             {
+                //this should be changed to DirArray
                 look = LookNext(node.x, node.y, i);
                 if (map[look.x, look.y] > 0)
                 {
+                    //check if it the postion has already been looked at
                     if (visitedMap[look.x, look.y] == 0)
                     {
+                        //set the position to being looked at
                         visitedMap[look.x, look.y] = 1;
+                        //set the looked at part to distance value + 1
                         newMap[look.x, look.y] = node.z + 1;
+                        //add to new part to the queue
                         PointsToLookAt.Enqueue(new Vector3Int(look.x,look.y, node.z + 1));
+                        //since a part had been added to the queue it's not an end point
                         isEndPoint = false;
                     }
                 }
-            }//*/
+            }
             if (isEndPoint == true)
             {
+                //if it's and endpoint add it to the queue
                 endPoints.Enqueue(node);
                 
             }
         }
-        
+        //now that all has been looked at. the endpoint queue will find the ends of the part
         if (endPoints.Count > 0)
-            newMap = CycleToEndPoints(newMap, endPoints);//*/
+            newMap = CycleToEndPoints(newMap, endPoints);
 
         return newMap;
     }
 
-    
-
+    //Will look for the end points in the map
     int[,] CycleToEndPoints(int[,] travelMap, Queue<Vector3Int> endpoints)
     {
         int[,] endMap = travelMap;
         int[,] visitedMap = new int[travelMap.GetLength(0), travelMap.GetLength(1)];
         Queue<Vector3Int> endQueue = new Queue<Vector3Int>();
         
-
+        //for the new queue
         while (endpoints.Count > 0)
         {
             Vector3Int node = endpoints.Dequeue();
@@ -74,6 +83,7 @@ public class ConnectionPoinSearch
         {
             bool hasHigherOrEqualNeighbor = false;
             Vector3Int node = endQueue.Dequeue();
+            //looks in it's surrounding is a node had a higher or equal distance value
             for (int x = node.x -1; x <= node.x + 1; x++)
             {
                 for (int y = node.y - 1; y <= node.y + 1; y++)
@@ -81,6 +91,7 @@ public class ConnectionPoinSearch
                     LookingAtNode = endMap[x, y];  thisNode = endMap[node.x, node.y];
                     if(endMap[x, y] >= endMap[node.x, node.y] && (x != node.x || y!= node.y))
                     {
+                        //it's not an end point
                         hasHigherOrEqualNeighbor = true;
                         if (visitedMap[x,y] == 0)
                         {
@@ -90,6 +101,7 @@ public class ConnectionPoinSearch
                     }
                 }
             }
+            //since it's the highest distance value in it's surrounding it is an end point
             if (hasHigherOrEqualNeighbor == false)
             {
                 endPointList.Add(new Vector2Int(node.x, node.y));
@@ -100,6 +112,7 @@ public class ConnectionPoinSearch
         return endMap;
     }
 
+    //almost the same but with slight tweaks
     public List<Vector2Int> GetKeyPositions(int[,] lockMap, Vector2Int lockPosition, int minDistance)
     {
         Queue<Vector3Int> nodeQue = new Queue<Vector3Int>();
@@ -124,7 +137,7 @@ public class ConnectionPoinSearch
                 Vector2Int pos = new Vector2Int(node.x + dir[i].x, node.y + dir[i].y);
                 if (IsInMap(width, length, pos) == false) continue; 
                 if( visitedMap[pos.x,pos.y] == 1 || lockMap[pos.x, pos.y] == 0) continue;
-
+                //checks for minimum and max distance
                 if (node.z + 1 >= minDistance)
                     keyPositions.Add(new Vector2Int(node.x, node.y));
                 if (node.z + 1 > maximumDistance)
@@ -135,8 +148,10 @@ public class ConnectionPoinSearch
                 nodeQue.Enqueue(node + dir[i]+Vector3Int.forward);
             }
         }
+        //for if no avalible space was in the minimum distance
         if(keyPositions.Count == 0)
         {
+            //it will look for the furthest aways point, that is the max distance
             for (int i = 0; i < width; i++)
             {
                 for (int j = 0; j < length; j++)
@@ -148,7 +163,8 @@ public class ConnectionPoinSearch
         }
         return keyPositions;
     }
-
+    //looks for the middle of the avalible tiles.
+    //Only works on trimmed maps
     public Vector2Int LookForMiddle(int[,] map)
     {
         //Can find a rough middle point of a given map
@@ -173,12 +189,13 @@ public class ConnectionPoinSearch
         int middleY = yOpenSpaces[Mathf.RoundToInt((yOpenSpaces.Count - 1) / 2f)];
         return new Vector2Int(middleX, middleY);
     }
-
+    //simble bool to check if value is inside the map
     bool IsInMap(int width,int length, Vector2Int pos)
     {
         return (pos.x >= 0 && pos.x < width && pos.y >= 0 && pos.y < length);
     }
 
+    //made this befor DirArray class
     Vector2Int LookNext(int x, int y, int iteration)
     {
         Vector2Int xny = new Vector2Int(x,y);
@@ -199,11 +216,13 @@ public class ConnectionPoinSearch
         }
         return xny;
     }
+    //to get the end points quickly if the pathfinding has already been run
     public List<Vector2Int> GetEndPointsPosition()
     {
         return (endPointList == null) ? null : endPointList;
     }
 
+    //simmilar to the one in map gen but for event regions
     public List<List<Vector3Int>> DetectEventRegions(int[,] map)
     {
         List<List<Vector3Int>> regions = new List<List<Vector3Int>>();
@@ -222,6 +241,7 @@ public class ConnectionPoinSearch
         }
         return regions;
     }
+    //returns a struct with the values for the region, part of DetectEventRegions
     regionReturn GetRegion(int xStart, int yStart, int eventvalue, int[,] map, int[,] visitedmap)
     {
         List<Vector3Int> region = new List<Vector3Int>();

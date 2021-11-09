@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-static class DirArray 
+static class DirArray //for reuse of direction arrays I use ofthen in pathfinding
 {
     public static Vector2Int[] directions = { 
         Vector2Int.left, 

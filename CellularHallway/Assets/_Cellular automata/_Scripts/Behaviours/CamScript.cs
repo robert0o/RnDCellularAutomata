@@ -11,11 +11,12 @@ public class CamScript : MonoBehaviour
         {
             Vector3 target = player.transform.position;
             target.z = transform.position.z;
-            transform.position = Vector3.MoveTowards(transform.position, target, 1);
+            transform.position = Vector3.MoveTowards(transform.position, target, 2);
         }
     }
     public void setCam()
     {
+        //setting the camera already to position
         Vector3 target = player.transform.position;
         target.z = transform.position.z;
         transform.position = target;

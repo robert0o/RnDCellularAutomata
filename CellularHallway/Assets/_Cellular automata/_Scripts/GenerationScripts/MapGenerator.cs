@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
+
 public class MapGenerator : MonoBehaviour
 {
     public int width;
@@ -23,27 +24,28 @@ public class MapGenerator : MonoBehaviour
     public int[] rules = new int[9];
     List<int[,]> hallways;
 
+    //Get a list of parts taken from Cellular Automata
     public List<int[,]> GetMaps(string _seed, int _iterations)
     {
         seed = _seed;
         iterations = _iterations;
         hallways = gethallways();
-
+        //get parts from the map
         List<int[,]> maps = new List<int[,]>();
         ConnectionPoinSearch point = new ConnectionPoinSearch();
 
+        //invert the maps then add them to the list of return maps
         for (int i = 0; i < hallways.Count; i++)
         {
             hallways[i] = InvertMap(hallways[i]);
             hallways[i] = point.findEnds(hallways[i]);
             maps.Add(hallways[i]);
         }
-        /*CellPlacer cells = FindObjectOfType<CellPlacer>();
-        cells.PlaceCells(maps, hight);//*/
 
         return maps;
     }
 
+    //It was supposed to be hallways at first but later i changed it to be the rooms and corredors in one
     public List<int[,]> gethallways()
     {
         GenMap();
@@ -51,6 +53,8 @@ public class MapGenerator : MonoBehaviour
         hallways = ConvertToHallways();
         return hallways;
     }
+    //simply generates the map an iterates to it requested iteration.
+    //An optimization woud be to go trough iterations wile adding them then sending them all back at once.
     private void GenMap()
     {
         map = new int[width, hight];
@@ -61,6 +65,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    //Fill the map randomly with 1's and 0's
     void GenerateMap()
     {
         System.Random rng = new System.Random(seed.GetHashCode());
@@ -78,6 +83,8 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    //looping trough all the cells in the map and applying the rules on them then setting the map to the iteration
+    //and better solution would be to have it return the map it made.
     void Iterate()
     {
         int[,] iterationMap = new int[width, hight];
@@ -90,7 +97,7 @@ public class MapGenerator : MonoBehaviour
         }
         map = iterationMap;
     }
-    
+    //the rules for the cells in a switch statement
     int Rules(int walls)
     {
         int state = 0;
@@ -130,6 +137,7 @@ public class MapGenerator : MonoBehaviour
         }
         return state;
     }
+    //checks the surrounding walls
     int SurroundWalls(int xPos, int yPos)
     {
         int wallCount = 0;
@@ -150,7 +158,7 @@ public class MapGenerator : MonoBehaviour
         }
         return wallCount;
     }
-
+    //a simple holder I made bevore I figured out Vector2Int was a thing
     public struct Tile
     {
         public int xPos, yPos;
@@ -161,12 +169,14 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    //removing small areas so unesecary parts won't be added to the map
     void getSectionsLists()
     {
         RemoveSmallSections(1, minWallSize, 0);
         RemoveSmallSections(0, minRoomSize, 1);
     }
 
+    //Loops trough the map to se if a small section is present then changes it
     void RemoveSmallSections(int targetState, int minimumSize, int changeTo)
     {
         List<List<Tile>> wallSections = GetSections(targetState);
@@ -182,6 +192,7 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    //looks for areas in the map.
     List<List<Tile>> GetSections(int tileState)
     {
         List<List<Tile>> sections = new List<List<Tile>>();
@@ -194,6 +205,7 @@ public class MapGenerator : MonoBehaviour
                 {
                     List<Tile> section = Setsection(x, y);
                     sections.Add(section);
+                    //set the tiles to visited so they won't be added to a section again.
                     foreach(Tile tile in section)
                     {
                         VisitedTiles[tile.xPos, tile.yPos] = 1;
@@ -204,6 +216,7 @@ public class MapGenerator : MonoBehaviour
         return sections;
     }
 
+    //the searching for a section I recently improved this one with the Static DirArray class. other pathfinding is based on this
     List<Tile> Setsection(int startX, int startY)
     {
         List<Tile> section = new List<Tile>();
@@ -231,6 +244,7 @@ public class MapGenerator : MonoBehaviour
             return section;
     }
 
+    //making a niew int[,] for a section with and added boarder of walls
     List<int[,]> ConvertToHallways()
     {
         List<int[,]> hallways = new List<int[,]>();
@@ -277,12 +291,14 @@ public class MapGenerator : MonoBehaviour
         }
         return hallways;
     }
-
+    //a simple check and the name says all
     bool IsInsideMap(int x,int y)
     {
         return (x >= 0 && x < width && y >= 0 && y < hight);
     }
 
+    //since i used 1 = wall and 0 = empty space and later i used 0 as wall and 1 and up for avalible spaces I wanted to invert the map.
+    //i could actually just turn it around for all function but this was easier and saved time
     int[,] InvertMap(int[,] _map)
     {
         int[,] newMap = new int[_map.GetLength(0), _map.GetLength(1)];
@@ -295,32 +311,4 @@ public class MapGenerator : MonoBehaviour
         }
         return newMap;
     }
-
-    /*private void OnDrawGizmos()
-    {
-        if (map == null) return;
-        for (int x = 0; x < width; x++)
-        {
-            for (int y = 0; y < hight; y++)
-            {
-                switch (map[x, y])
-                {
-                    case 1:
-                        Gizmos.color = Color.black;
-                        break;
-                    case 0:
-                        Gizmos.color = Color.white;
-                        break;
-                    case 2:
-                        Gizmos.color = Color.red;
-                        break;
-                    default:
-                        Gizmos.color = Color.yellow;
-                        break;
-                }
-                Vector3 pos = new Vector3(x, y, 0);
-                Gizmos.DrawCube(pos, Vector3.one);
-            }
-        }
-    }//*/
 }

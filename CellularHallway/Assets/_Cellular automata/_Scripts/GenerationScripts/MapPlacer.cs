@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/* I'm not using this anymore. I kept making it more complicate an starting half staring over again
+ * making it hard to remember what does what so i made a MapPlacer2 to really start over
+ */
 public class MapPlacer : MonoBehaviour
 {
     public MapGenerator mapGen;

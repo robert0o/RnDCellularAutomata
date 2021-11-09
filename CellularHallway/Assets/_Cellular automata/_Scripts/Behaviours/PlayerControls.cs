@@ -5,14 +5,19 @@ using UnityEngine;
 public class PlayerControls : MonoBehaviour
 {
     Rigidbody2D rb;
+    public GameObject shield;
+    int shieldHP = 4;
+    int HP = 4;
+    int currentHP, currentShield;
     public float speed;
     Vector2 walk;
-    // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
+        //set the payer instance of the cam to this player and setting it's position
         FindObjectOfType<CamScript>().player = this.gameObject;
         FindObjectOfType<CamScript>().setCam();
+        currentHP = HP;
     }
 
     // Update is called once per frame
@@ -25,6 +30,7 @@ public class PlayerControls : MonoBehaviour
     }
     void Walking()
     {
+        //making a movement direction Vector with input.
         walk = Vector2.zero;
         if (Input.GetKey(KeyCode.W))
         { walk += Vector2.up; }
@@ -37,5 +43,25 @@ public class PlayerControls : MonoBehaviour
         walk.Normalize();
         walk *= speed;
         rb.velocity = walk;
+    }
+
+    public void SetShield()
+    {
+        //makes the shield active
+        shield.SetActive(true);
+        currentShield = shieldHP;
+    }
+    public void TakingDamage()
+    {
+        //when taking damage
+        if (currentShield > 0)
+            currentShield--;
+        else
+            currentHP--;
+
+        if(currentHP == 0)
+        {
+            //death stuff
+        }
     }
 }
