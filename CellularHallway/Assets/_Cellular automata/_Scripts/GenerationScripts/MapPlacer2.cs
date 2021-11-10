@@ -53,6 +53,17 @@ public class MapPlacer2 : MonoBehaviour
 
     public void Start()
     {
+        Application.targetFrameRate = 90;
+        //time to see how long it takes for the dungeon to generate
+        System.Diagnostics.Stopwatch timer = new System.Diagnostics.Stopwatch();
+        timer.Start();
+        CreateDungeon();
+        timer.Stop();
+        Debug.Log("Time taken: " + timer.ElapsedMilliseconds + " milliseconds");
+    }
+
+    public void CreateDungeon()
+    {
         //generate a random seed. this should always be true when building
         if (randomSeed == true) Seed = Random.Range(float.MinValue, float.MaxValue).ToString();
         rng.setSeed(Seed.GetHashCode());
